@@ -86,7 +86,8 @@ cel-lab/
 |   |-- analysis/      # the five analysis questions
 |   |-- storage/       # saving / loading definitions, experiments and histories
 |   |-- nlp/           # deterministic natural-language parser
-|   `-- ui/            # Streamlit application
+|   |-- ui/            # Streamlit application
+|   `-- presets/       # ready-made definitions of known automata
 |-- experiments/       # Deliverable 3: dataset generation + neural-network experiment
 |-- examples/automata/ # example definitions and natural-language descriptions
 |-- tests/             # pytest suite
@@ -105,12 +106,18 @@ cel-lab/
 
 Requirements: **Python 3.11+** and **Git**.
 
+Run every command below from the repository folder (`cel-lab`). Once the virtual environment is
+activated, `python` and `pip` refer to it. Without activating it, call it by path: in PowerShell
+`.\.venv\Scripts\python -m pytest` (note the leading `.\`).
+
 ```bash
 git clone https://github.com/IntCommandNew/cel-lab.git
 cd cel-lab
 python -m venv .venv
-# Windows:
-.venv\Scripts\activate
+# Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
+# Windows Command Prompt:
+.venv\Scripts\activate.bat
 # Linux / macOS:
 source .venv/bin/activate
 

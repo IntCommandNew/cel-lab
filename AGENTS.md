@@ -57,7 +57,7 @@ Python >= 3.11, NumPy (grids & simulation), Streamlit (GUI), JSON + compressed `
 
 ```bash
 python -m venv .venv                     # once
-.venv\Scripts\activate                   # Windows  (source .venv/bin/activate on Linux/macOS)
+.\.venv\Scripts\Activate.ps1             # Windows PowerShell (Linux/macOS: source .venv/bin/activate)
 pip install -e ".[dev]"                  # app + test tools   (add ,ml for the NN experiment)
 python -m pytest                         # run tests
 ruff check . && ruff format .            # lint + format
@@ -75,6 +75,7 @@ src/cellab/analysis/  the 5 analysis questions
 src/cellab/storage/   save/load definitions, experiments, generation histories
 src/cellab/nlp/       deterministic natural-language parser
 src/cellab/ui/        Streamlit app
+src/cellab/presets/   ready-made definitions of known automata (.json)
 experiments/          Deliverable 3: dataset generation + NN experiment
 examples/automata/    example definitions (.json) and NL descriptions (.txt)
 tests/                pytest suite (mirrors src/cellab)
@@ -116,6 +117,10 @@ them from there; they are used automatically when relevant or invoked with `/<na
 The skill targets HTML/CSS/React pages. In this project apply its guidance through Streamlit's
 means: the theme in `.streamlit/config.toml`, layout primitives (columns, tabs, containers), and
 custom CSS only where the theme is not enough.
+
+**Use `frontend-design` implicitly**, without being asked, whenever work touches UI/UX: GUI
+layout and styling, terminal output meant for people (CLI rendering, messages), visualisations
+(grid colours, charts) and interface wording (labels, buttons, errors).
 
 ## Third-party files
 

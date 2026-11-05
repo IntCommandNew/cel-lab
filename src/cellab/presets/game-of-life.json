@@ -1,0 +1,15 @@
+{
+  "name": "Game of Life",
+  "description": "Conway's classic: cells live, die and are born depending on how many neighbours are alive.",
+  "grid": { "width": 40, "height": 30, "boundary": "wrap" },
+  "states": [
+    { "name": "dead", "symbol": ".", "color": "#F3F5F8" },
+    { "name": "alive", "symbol": "#", "color": "#2E2A5C" }
+  ],
+  "default_state": "dead",
+  "neighborhood": { "type": "moore", "radius": 1 },
+  "rules": [
+    { "from": "alive", "to": "dead", "when": { "count": "alive", "not_in": [2, 3] } },
+    { "from": "dead", "to": "alive", "when": { "count": "alive", "eq": 3 } }
+  ]
+}

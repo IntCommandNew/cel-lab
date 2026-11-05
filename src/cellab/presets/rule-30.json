@@ -1,0 +1,14 @@
+{
+  "name": "Rule 30",
+  "description": "Elementary one-dimensional automaton: a single live cell grows into a chaotic triangle.",
+  "grid": { "width": 81, "height": 1, "boundary": { "fixed": "dead" } },
+  "states": [
+    { "name": "dead", "symbol": "0", "color": "#F3F5F8" },
+    { "name": "alive", "symbol": "1", "color": "#2E2A5C" }
+  ],
+  "default_state": "dead",
+  "neighborhood": { "type": "elementary", "radius": 1 },
+  "rules": [
+    { "kind": "elementary", "code": 30 }
+  ]
+}

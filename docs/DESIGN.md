@@ -57,36 +57,47 @@ Forest Fire / SIR. **Stretch (only if time allows):** Langton's Ant, Sandpile, H
 agents or numeric cells). **Out of scope:** agents with memory/energy/movement (Predator-Prey,
 Schelling, Falling sand, Ecosystem).
 
-### Definition format (draft)
+### Definition format
+
+Implemented in `cellab.model` (dataclasses in `definition.py`, checks in `validate.py`). Presets in
+`src/cellab/presets/` are complete examples.
 
 ```json
 {
   "name": "Game of Life",
+  "description": "Optional text shown with the automaton.",
   "grid": { "width": 40, "height": 30, "boundary": "wrap" },
   "states": [
-    { "name": "dead",  "symbol": ".", "color": "#f5f5f5" },
-    { "name": "alive", "symbol": "#", "color": "#222222" }
+    { "name": "dead", "symbol": ".", "color": "#F3F5F8" },
+    { "name": "alive", "symbol": "#", "color": "#2E2A5C" }
   ],
   "default_state": "dead",
   "neighborhood": { "type": "moore", "radius": 1 },
   "rules": [
-    { "from": "alive", "to": "dead",  "when": { "count": "alive", "not_in": [2, 3] } },
-    { "from": "dead",  "to": "alive", "when": { "count": "alive", "in": [3] } }
+    { "from": "alive", "to": "dead", "when": { "count": "alive", "not_in": [2, 3] } },
+    { "from": "dead", "to": "alive", "when": { "count": "alive", "eq": 3 } }
   ]
 }
 ```
 
-- **Boundary:** `"wrap"` (torus) or `{"fixed": "<state>"}` (cells outside the grid count as that
-  state).
-- **Neighbourhood:** `moore` (8 cells at radius 1), `von_neumann` (4), with a `radius`;
-  `"elementary"` for 1D.
-- **Conditions:** `count` of a state compared with
-  `eq / ne / lt / le / gt / ge / in / not_in / between`; combinators `all`, `any`, `not`;
-  `"always"`; optional `probability`.
-- **Elementary rules:** `{ "kind": "elementary", "code": 30 }` - expanded to the 8-entry lookup
-  table.
+- **Grid:** `width` and `height` from 1 to 1000. `boundary` is `"wrap"` (edges join up, the
+  default) or `{"fixed": "<state>"}` (cells outside the grid count as that state).
+- **States:** 1 to 256, each with a unique `name` (not `any`), a unique one-character `symbol`
+  (visible keyboard character, used in text grids) and a `color` (`#RRGGBB`). `default_state`
+  fills empty cells.
+- **Neighbourhood:** `moore` (8 cells at radius 1), `von_neumann` (4), `elementary` (left and
+  right cell, 1D); `radius` 1 to 5 (default 1). Neighbourhood size: Moore `(2r+1)^2 - 1`,
+  von Neumann `2r(r+1)`.
+- **Rules:** `from` is a state, a list of states, or `"any"` (the default when omitted); `to` is
+  required; `when` is optional (default `"always"`); `probability` is optional (0 < p <= 1).
+- **Conditions:** `{"count": <state or list of states>, <op>: <value>}` with one op:
+  `eq / ne / lt / le / gt / ge` (whole number), `in / not_in` (list), `between` (`[low, high]`,
+  inclusive); combinators `{"all": [...]}`, `{"any": [...]}`, `{"not": {...}}`; or `"always"`.
+- **Elementary rules:** `{ "kind": "elementary", "code": 30 }` must be the only rule, with two
+  states (0 and 1, in order), the `elementary` neighbourhood and grid height 1.
 - **Templates such as Cyclic CA** ("x becomes (x+1) mod k") are expanded into one concrete rule per
   state by the parser/presets, so the engine stays simple.
+- Unknown fields are reported as warnings and ignored.
 
 ### Semantics (explicit, no hidden cases)
 

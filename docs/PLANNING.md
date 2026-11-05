@@ -38,26 +38,35 @@ so they are scheduled in Sprint 3 where there is the most time.
 
 ---
 
-## Sprint 2 - Automaton model & simulation core (due L6, 6 Nov 2026)
+## Sprint 2 - Automaton model, simulation core & GUI preview (due L6, 6 Nov 2026)
 
 **Deliverable:** world state and rules, experiment parameters, state storage and recovery; tested on
 2-3 automata (read the current generation, apply the rules, produce the new state).
 
+**Also in this sprint:** a first GUI that already has the main ideas and components of the final
+one, so we can see how it looks, feels and works. Three ways to get an automaton definition (the
+JSON that the natural-language parser will produce in Sprint 4): pick a preset, build it with a
+form, or paste/upload a JSON. Every definition is validated, then it can be run.
+
+Built in chunks; each chunk ends with passing tests and is checked before the next one starts.
+
 - [x] Repository setup: structure, `pyproject.toml`, VS Code + Claude Code config, README, prompt
       log
-- [ ] Formal definition dataclasses + JSON load/save (`cellab.model`)
-- [ ] Validator: structural + reference checks, impossible counts (`cellab.model`)
-- [ ] Simulation engine: Moore / von Neumann, wrap & fixed boundaries, ordered rules
-      (`cellab.engine`)
-- [ ] Elementary (1D) lookup rules - Rule 30 (`cellab.engine`)
-- [ ] Initial world: manual text grid, random with seed, centre cell (`cellab.engine`)
-- [ ] Experiment parameters + history modes (all / every k / final) + hashes
-- [ ] Storage & recovery: save run folder, reload, resume (`cellab.storage`)
-- [ ] Example definitions in `examples/automata/`: Game of Life, Brian's Brain, Rule 30 (+ Forest
-      Fire)
-- [ ] Tests: blinker/glider (Life), Brian's Brain known step, Rule 30 first rows, save -> load ->
-      resume
-- [ ] Small CLI or notebook demo for the presentation (load definition -> step -> print grid)
+- [ ] **Chunk 1 - Model:** definition dataclasses + JSON load/save, validator (structural,
+      reference, semantic checks with field paths), plain-English summary, presets (Game of Life,
+      Brian's Brain, Rule 30, Forest Fire); unit tests
+- [ ] **Chunk 2 - Engine:** neighbour counting (Moore / von Neumann, wrap / fixed boundary),
+      ordered rules, elementary (1D) rules, initial worlds (text grid, random with seed, centre
+      cell); unit tests with known patterns (blinker, glider, Brian's Brain step, Rule 30 rows)
+- [ ] **Chunk 3 - Simulation & storage:** experiment parameters, history modes (all / every k /
+      final), generation hashes, save run folder, reload, resume; integration tests (save -> load
+      -> resume equals an uninterrupted run)
+- [ ] **Chunk 4 - GUI shell & definitions:** theme, layout, preset picker, JSON paste/upload with
+      validation messages, readable summary of the definition; Streamlit `AppTest` tests
+- [ ] **Chunk 5 - GUI definition builder:** form for grid, states, neighbourhood and rules that
+      produces the JSON (preview + download); `AppTest` tests
+- [ ] **Chunk 6 - GUI run & inspect:** initial world, run parameters, run, grid viewer with
+      generation slider, population chart, save / load runs; `AppTest` tests + manual check
 
 ## Sprint 3 - Analysis, GUI v1, dataset & NN (due L11, 11 Dec 2026)
 
@@ -67,8 +76,8 @@ so they are scheduled in Sprint 3 where there is the most time.
 
 - [ ] Analysis engine: state after N (with cycle jump-ahead), stability, pattern occurrence,
       cell count, cycle detection - with confirmed / not-found / not-applicable statuses
-- [ ] Streamlit GUI v1: load/edit definition (JSON/table), initial world, parameters, run,
-      generation slider + playback, population chart, analysis form, saved runs browser
+- [ ] Streamlit GUI v1: refine the Sprint 2 preview (playback, analysis form, saved runs
+      browser, design polish)
 - [ ] More automata: Cyclic CA, Forest Fire, Voter, Crystal growth, SIR (deterministic)
 
 *By L11 (11 Dec):*
