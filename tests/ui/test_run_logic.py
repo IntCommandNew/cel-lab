@@ -97,3 +97,21 @@ def test_pale_state_colours_are_replaced_in_charts():
 def test_generations_label():
     assert generations_label(1) == "1 generation"
     assert generations_label(50) == "50 generations"
+
+
+def test_next_view_during_playback():
+    from cellab.ui.run_logic import next_view
+
+    assert next_view([0, 1, 2, 3], 0) == (1, False)
+    assert next_view([0, 1, 2, 3], 2) == (3, True)
+    assert next_view([0, 1, 2, 3], 3) == (3, True)
+    assert next_view([0, 10, 20, 25], 10) == (20, False)  # only stored generations
+
+
+def test_neighbour_view_stays_in_range():
+    from cellab.ui.run_logic import neighbour_view
+
+    assert neighbour_view([0, 1, 2], 1, -1) == 0
+    assert neighbour_view([0, 1, 2], 0, -1) == 0
+    assert neighbour_view([0, 1, 2], 2, +1) == 2
+    assert neighbour_view([0, 10, 20], 10, +1) == 20

@@ -65,7 +65,7 @@ Built in chunks; each chunk ends with passing tests and is checked before the ne
       validation messages, readable summary of the definition; Streamlit `AppTest` tests
 - [x] **Chunk 5 - GUI definition builder:** form for grid, states, neighbourhood and rules that
       produces the JSON (preview + download); `AppTest` tests
-- [ ] **Chunk 6 - GUI run & inspect:** initial world, run parameters, run, grid viewer with
+- [x] **Chunk 6 - GUI run & inspect:** initial world, run parameters, run, grid viewer with
       generation slider, population chart, save / load runs; `AppTest` tests + manual check
 
 ## Sprint 3 - Analysis, GUI v1, dataset & NN (due L11, 11 Dec 2026)
@@ -76,8 +76,8 @@ Built in chunks; each chunk ends with passing tests and is checked before the ne
 
 - [ ] Analysis engine: state after N (with cycle jump-ahead), stability, pattern occurrence,
       cell count, cycle detection - with confirmed / not-found / not-applicable statuses
-- [ ] Streamlit GUI v1: refine the Sprint 2 preview (playback, analysis form, saved runs
-      browser, design polish)
+- [x] GUI playback (play / pause / resume / skip, editable delay) and saved runs browser
+- [ ] Streamlit GUI v1: refine the Sprint 2 preview (analysis form, design polish)
 - [ ] More automata: Cyclic CA, Forest Fire, Voter, Crystal growth, SIR (deterministic)
 
 *By L11 (11 Dec):*

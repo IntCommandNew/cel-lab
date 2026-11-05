@@ -364,10 +364,61 @@ def test_random_rules_ask_for_a_seed_and_show_only_stored_generations(app):
     assert "only the stored generations can be shown" in texts(app)
 
 
-def test_changing_the_automaton_after_a_run_is_pointed_out(app):
+def test_changing_the_automaton_previews_its_world_and_keeps_the_run(app):
     run_button(app).click().run()
     app.selectbox(key="preset_id").set_value("brians-brain").run()
-    assert "This run used a different automaton" in app.info[0].value
+    assert "**Brian's Brain**: initial world for the current settings" in texts(app)
+    assert not [b for b in app.button if b.label in ("Save run", "Continue for 50 generations")]
+    app.selectbox(key="preset_id").set_value("game-of-life").run()
+    assert headline(app) == "**Game of Life**: generation 50 of 50."
+
+
+def test_changing_the_world_settings_shows_the_new_initial_world(app):
+    run_button(app).click().run()
+    app.number_input(key="w_seed").set_value(7).run()
+    assert "initial world for the current settings" in texts(app)
+    app.number_input(key="w_seed").set_value(1).run()  # back to the settings of the run
+    assert headline(app) == "**Game of Life**: generation 50 of 50."
+
+
+def by_key(at, key):
+    return next(b for b in at.button if b.key == key)
+
+
+def test_arrow_buttons_step_through_generations(app):
+    run_button(app).click().run()
+    assert by_key(app, "view_next").disabled  # already at the last generation
+    by_key(app, "view_prev").click().run()
+    by_key(app, "view_prev").click().run()
+    assert headline(app) == "**Game of Life**: generation 48 of 50."
+    by_key(app, "view_next").click().run()
+    assert headline(app) == "**Game of Life**: generation 49 of 50."
+
+
+def test_play_pause_resume_and_skip(app):
+    run_button(app).click().run()
+    app.select_slider(key="run_view").set_value(10).run()
+    by_key(app, "play_pause").click().run()
+    assert app.session_state["play_state"] == "playing"
+    assert by_key(app, "play_pause").label == "Pause"
+    assert app.select_slider(key="play_delay").disabled  # speed fixed while playing
+    assert app.select_slider(key="run_view").disabled
+    by_key(app, "play_pause").click().run()
+    assert app.session_state["play_state"] == "paused"
+    assert by_key(app, "play_pause").label == "Resume"
+    assert not app.select_slider(key="play_delay").disabled  # editable while paused
+    app.select_slider(key="play_delay").set_value(0.5).run()
+    by_key(app, "skip_end").click().run()
+    assert headline(app) == "**Game of Life**: generation 50 of 50."
+    assert app.session_state["play_state"] == "stopped"
+    assert by_key(app, "play_pause").label == "Play"
+
+
+def test_play_at_the_end_starts_again_from_the_beginning(app):
+    run_button(app).click().run()
+    by_key(app, "play_pause").click().run()
+    # the first frame after pressing Play already shows generation 1
+    assert headline(app) == "**Game of Life**: generation 1 of 50."
 
 
 def test_run_flows_do_not_trigger_state_warnings(app, streamlit_warnings, tmp_path, monkeypatch):
@@ -381,3 +432,21 @@ def test_run_flows_do_not_trigger_state_warnings(app, streamlit_warnings, tmp_pa
     assert group(app, "w_kind").value == "centre"  # kept while the step was redrawn
     assert not app.exception
     assert streamlit_warnings == []
+
+
+def test_opening_a_saved_run_shows_the_world_tab(app, tmp_path, monkeypatch, streamlit_warnings):
+    monkeypatch.setenv("CELLAB_RUNS_DIR", str(tmp_path))
+    run_button(app).click().run()
+    button(app, "Save run").click().run()
+    app.session_state["result_tab"] = "Saved runs"  # the user opens the Saved runs tab
+    app.run()
+    button(app, "Open run").click().run()
+    assert app.session_state["result_tab"] == "World"
+    assert not app.exception and streamlit_warnings == []
+
+
+def test_running_from_another_tab_shows_the_world_tab(app):
+    app.session_state["result_tab"] = "Definition"
+    app.run()
+    run_button(app).click().run()
+    assert app.session_state["result_tab"] == "World"

@@ -20,10 +20,13 @@ from cellab.model import Automaton
 from cellab.storage import DEFAULT_ROOT, StorageError, list_runs, load_run, save_run
 from cellab.ui.components import swatch
 from cellab.ui.run_logic import (
+    PLAY_DELAYS,
     build_world,
     chart_colors,
     default_world,
     generations_label,
+    neighbour_view,
+    next_view,
     render,
     space_time,
 )
@@ -129,8 +132,16 @@ def world_section(automaton: Automaton) -> tuple[np.ndarray | None, dict]:
 # --- step 3: run ----------------------------------------------------------------------------
 
 
+def showing_run(automaton: Automaton | None, setting: dict | None) -> bool:
+    """The run is shown only for the automaton and world settings it was made with; after a
+    change, the World tab previews the new initial world instead."""
+    ss = st.session_state
+    return ss.get("run") is not None and ss.get("run_context") == (automaton, setting)
+
+
 def run_section(automaton: Automaton, world: np.ndarray | None, setting: dict) -> None:
     ss = st.session_state
+    ss.current_context = (automaton, setting)
     with st.container(horizontal=True, vertical_alignment="bottom"):
         generations = st.number_input(
             "Generations",
@@ -173,20 +184,24 @@ def run_section(automaton: Automaton, world: np.ndarray | None, setting: dict) -
             try:
                 with st.spinner("Running..."):
                     ss.run = simulate(automaton, world, int(generations), settings, setting)
+                ss.run_context = (automaton, setting)
+                stop_playback()
+                show_world_tab()
                 ss.run_view = None  # show the last generation
                 ss.run_notice = None
             except SimulationError as exc:
                 st.error(str(exc))
         run = ss.get("run")  # may have been replaced by the Run button just above
-        can_continue = run is not None and run.automaton == automaton
+        can_continue = showing_run(automaton, setting) and run.automaton == automaton
         if can_continue and st.button(f"Continue for {generations_label(int(generations))}"):
             try:
                 with st.spinner("Running..."):
                     run.advance(int(generations))
                 ss.run_view = None
+                show_world_tab()
             except SimulationError as exc:
                 st.error(str(exc))
-        if ss.get("run") is not None and st.button("Save run"):
+        if showing_run(automaton, setting) and st.button("Save run"):
             try:
                 folder = save_run(ss.run, ss.run.meta.get("folder"), root=runs_root())
                 ss.run_notice = f"Saved as {os.path.basename(folder)} in {runs_root()}."
@@ -203,43 +218,153 @@ def _show_grid(automaton: Automaton, grid: np.ndarray, alt: str) -> None:
     st.image(render(automaton, grid), alt=alt)
 
 
-def world_tab(automaton: Automaton | None, preview: np.ndarray | None) -> None:
-    ss = st.session_state
-    run = ss.get("run")
-    if run is None:
-        if automaton is None or preview is None:
-            st.markdown("The world appears here once the automaton and initial world are valid.")
-            return
-        st.markdown(f"**{automaton.name}**: initial world, not run yet.")
-        _show_grid(automaton, preview, alt=f"Initial world of {automaton.name}")
-        return
+def show_world_tab() -> None:
+    """Switch the right column to the World tab (runs before the tab bar is drawn)."""
+    st.session_state.result_tab = "World"
 
-    a = run.automaton
-    if automaton is not None and a != automaton:
-        st.info(
-            "This run used a different automaton than the one on the left. Run again to "
-            "simulate the current one."
-        )
-    last = run.last_generation
+
+def stop_playback() -> None:
+    st.session_state.play_state = "stopped"
+
+
+def _view_options(run) -> list[int]:
     # random runs: generations that were not stored cannot be recomputed
-    options = list(range(last + 1)) if run.is_deterministic else run.stored_generations
+    if run.is_deterministic:
+        return list(range(run.last_generation + 1))
+    return run.stored_generations
+
+
+def _play_pause() -> None:
+    ss = st.session_state
+    if ss.play_state == "playing":
+        ss.play_state = "paused"
+    else:
+        options = _view_options(ss.run)
+        if ss.run_view == options[-1]:  # at the end: play again from the start
+            ss.run_view = options[0]
+        ss.play_state = "playing"
+    st.rerun()  # full rerun, so the timer of the player starts or stops
+
+
+def _skip_to_end() -> None:
+    ss = st.session_state
+    ss.run_view = _view_options(ss.run)[-1]
+    ss.play_state = "stopped"
+    st.rerun()
+
+
+def _step(step: int) -> None:
+    ss = st.session_state
+    ss.run_view = neighbour_view(_view_options(ss.run), ss.run_view, step)
+
+
+def _player() -> None:
+    """Grid, playback controls and slider; reruns on its own timer while playing."""
+    ss = st.session_state
+    run = ss.run
+    a = run.automaton
+    options = _view_options(run)
     if ss.get("run_view") not in options:
         ss.run_view = options[-1]
-    # the slider is drawn under the grid (a scrubber); its value is already in session state
+    playing = ss.play_state == "playing"
+    if playing:
+        ss.run_view, at_end = next_view(options, ss.run_view)
+        if at_end:
+            ss.play_state = "stopped"
+            st.rerun()  # stop the timer
     g = ss.run_view
+    last = run.last_generation
+
     st.markdown(f"**{a.name}**: generation {g} of {last}.")
     if a.is_elementary:
         _show_grid(a, space_time(run, g), alt=f"{a.name}, generations 0 to {g}, time downwards")
         st.caption("Each row is one generation; time runs downwards.")
     else:
         _show_grid(a, run.generation(g), alt=f"{a.name} at generation {g}")
+
     if len(options) > 1:
-        st.select_slider("Generation", options, key="run_view")
+        with st.container(horizontal=True, vertical_alignment="center"):
+            st.button(
+                "",
+                icon=":material/chevron_left:",
+                help="Previous generation",
+                key="view_prev",
+                on_click=_step,
+                args=(-1,),
+                disabled=playing or g == options[0],
+            )
+            st.select_slider(
+                "Generation",
+                options,
+                key="run_view",
+                disabled=playing,
+                label_visibility="collapsed",
+            )
+            st.button(
+                "",
+                icon=":material/chevron_right:",
+                help="Next generation",
+                key="view_next",
+                on_click=_step,
+                args=(1,),
+                disabled=playing or g == options[-1],
+            )
+        with st.container(horizontal=True, vertical_alignment="bottom"):
+            label = {"playing": "Pause", "paused": "Resume"}.get(ss.play_state, "Play")
+            icon = ":material/pause:" if playing else ":material/play_arrow:"
+            st.button(label, icon=icon, key="play_pause", on_click=_play_pause)
+            st.button(
+                "Skip to the end",
+                icon=":material/skip_next:",
+                key="skip_end",
+                on_click=_skip_to_end,
+                disabled=g == options[-1],
+            )
+            st.select_slider(
+                "Delay between generations",
+                PLAY_DELAYS,
+                format_func=lambda d: f"{d:g} s",
+                disabled=playing,
+                help="Change it before playing or while paused.",
+                **keep("play_delay", 0.2),
+            )
 
     table = run.population_table()
     counts = ", ".join(f"{name} {int(n)}" for name, n in zip(a.state_names, table[g], strict=True))
     st.caption(f"Cells per state at generation {g}: {counts}.")
-    # chart the non-default states: the default state is usually the large, flat remainder
+
+
+def world_tab(
+    automaton: Automaton | None, preview: np.ndarray | None, setting: dict | None
+) -> None:
+    ss = st.session_state
+    ss.setdefault("play_state", "stopped")
+    if not showing_run(automaton, setting):
+        stop_playback()
+        if automaton is None or preview is None:
+            st.markdown("The world appears here once the automaton and initial world are valid.")
+            return
+        if ss.get("run") is None:
+            st.markdown(f"**{automaton.name}**: initial world, not run yet.")
+        else:
+            st.markdown(
+                f"**{automaton.name}**: initial world for the current settings. Run to simulate "
+                "it; the previous run comes back if you return to its settings."
+            )
+        _show_grid(automaton, preview, alt=f"Initial world of {automaton.name}")
+        return
+
+    run = ss.run
+    a = run.automaton
+    if automaton is not None and a != automaton:
+        st.info(
+            "This run used a different automaton than the one on the left. Run again to "
+            "simulate the current one."
+        )
+    delay = ss.get("_saved_play_delay", 0.2)
+    st.fragment(_player, run_every=delay if ss.play_state == "playing" else None)()
+
+    table = run.population_table()
     shown = [i for i, s in enumerate(a.states) if s.name != a.default_state] or [0]
     colors = chart_colors(a)
     st.html(
@@ -255,7 +380,7 @@ def world_tab(automaton: Automaton | None, preview: np.ndarray | None) -> None:
         x_label="Generation",
         y_label="Cells",
         height=220,
-        alt=f"Number of cells in each state over {last} generations",
+        alt=f"Number of cells in each state over {run.last_generation} generations",
     )
     if not run.is_deterministic and run.settings.history != "all":
         st.caption("This automaton has random rules, so only the stored generations can be shown.")
@@ -268,6 +393,10 @@ def _open_run(folder: str) -> None:
     ss = st.session_state
     try:
         ss.run = load_run(folder)
+        # show it until the automaton or world settings on the left are changed
+        ss.run_context = ss.get("current_context")
+        stop_playback()
+        show_world_tab()
         ss.run_view = None
         ss.run_notice = f"Opened {os.path.basename(folder)}."
     except StorageError as exc:

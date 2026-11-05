@@ -199,12 +199,12 @@ def automaton_section() -> ValidationResult | None:
     return result
 
 
-def later_steps(automaton: Automaton | None) -> np.ndarray | None:
-    """Steps 2 and 3; returns the initial world (for the preview), or None."""
+def later_steps(automaton: Automaton | None) -> tuple[np.ndarray | None, dict | None]:
+    """Steps 2 and 3; returns the initial world (for the preview) and its settings."""
     step_heading(2, "Initial world")
+    world, setting = None, None
     if automaton is None:
         st.caption("Choose a valid automaton first.")
-        world = None
     else:
         world, setting = world_section(automaton)
     step_heading(3, "Run")
@@ -212,7 +212,7 @@ def later_steps(automaton: Automaton | None) -> np.ndarray | None:
         st.caption("Choose a valid automaton first.")
     else:
         run_section(automaton, world, setting)
-    return world
+    return world, setting
 
 
 def definition_tab(result: ValidationResult | None) -> None:
@@ -250,11 +250,15 @@ def main() -> None:
     with left:
         result = automaton_section()
         automaton = result.automaton if result is not None else None
-        preview = later_steps(automaton)
+        preview, setting = later_steps(automaton)
     with right:
-        world, definition, json_view, saved = st.tabs(["World", "Definition", "JSON", "Saved runs"])
+        # a keyed tab bar: code can switch to the World tab (after Run, Continue, Open run)
+        st.session_state.setdefault("result_tab", "World")
+        world, definition, json_view, saved = st.tabs(
+            ["World", "Definition", "JSON", "Saved runs"], key="result_tab", on_change="rerun"
+        )
         with world:
-            world_tab(automaton, preview)
+            world_tab(automaton, preview, setting)
         with definition:
             definition_tab(result)
         with json_view:

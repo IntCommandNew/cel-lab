@@ -81,3 +81,22 @@ def chart_colors(automaton: Automaton) -> list[str]:
 
 def generations_label(n: int) -> str:
     return f"{n} generation" if n == 1 else f"{n} generations"
+
+
+# --- playback -------------------------------------------------------------------------------
+
+PLAY_DELAYS = (0.1, 0.2, 0.5, 1.0, 2.0)  # seconds between generations
+
+
+def next_view(options: list[int], current: int) -> tuple[int, bool]:
+    """The generation shown after `current` during playback, and whether the end is reached."""
+    later = [g for g in options if g > current]
+    if not later:
+        return options[-1], True
+    return later[0], later[0] == options[-1]
+
+
+def neighbour_view(options: list[int], current: int, step: int) -> int:
+    """The generation one position before (step=-1) or after (step=+1) `current`."""
+    i = options.index(current) if current in options else 0
+    return options[max(0, min(len(options) - 1, i + step))]
