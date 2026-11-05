@@ -243,7 +243,8 @@ from histology stains rather than from a generic app kit:
 | Slide glass | `#F3F5F8` | page background, empty / dead cells |
 | Deep glass | `#E6E9F0` | inputs, code blocks |
 | Hematoxylin | `#2E2A5C` | all text, the main living state |
-| Eosin | `#C2306A` | the only accent: primary actions, selected controls (darkened from `#D9467A`, still used for cells, so white text reaches about 5:1 contrast) |
+| Methylene blue | `#1F5FA6` | the only accent: primary actions, selected controls, focus (white text about 6.5:1). Replaced eosin (`#C2306A`) because a red accent made selections look like errors |
+| Eosin | `#D9467A` | a state colour only (e.g. firing cells), never for interface controls |
 | Orange G / Light Green SF | `#E8A33A` / `#4F9D69` | further state colours (fire, tree) |
 | Graticule | `#7A8094` | hairlines, step numbers, secondary text |
 
@@ -269,7 +270,18 @@ Choose or write a cellular automaton, check it, then run it.
 - Every source of a definition (known automaton, form, JSON, later natural language) produces the
   same JSON and goes through the same validator. Errors and warnings name the field and say how to
   fix it; warnings never block.
-- Restraint: no cards, shadows, gradients, all-caps labels or emojis; one accent colour.
+- **Form builder** (*Build*): name, grid size, a states table (name, one-character symbol, colour),
+  default state, edges, neighbourhood and a rules table that reads like a sentence: *cell in
+  state* / *becomes* / *when it has* (always, exactly, at least, one of, between, ...) /
+  *number(s)* / *neighbours in state* / *probability*. One count condition per rule; combined
+  conditions stay in the JSON editor ("Edit in the form" is disabled there, with the reason).
+  Renaming a state renames it in the rules, default and edge state. *Clear the form* (with a
+  confirmation) resets only the form; known automata and the JSON draft keep their own state.
+  Elementary automata ask for a rule number instead of a rules table. The form logic
+  (`ui/builder.py`) is pure Python and unit-tested; any definition the form can show survives
+  definition -> form -> definition unchanged. The left column widens while building.
+- Restraint: no cards, shadows, gradients, all-caps labels or emojis; one accent colour, never
+  red (red is reserved for errors).
 - Review rule: check new screens in a real browser (desktop and phone width) before merging.
 
 ## 12. Main decisions (summary)

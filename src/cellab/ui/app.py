@@ -9,12 +9,20 @@ the same JSON and the same validator.
 
 from __future__ import annotations
 
+import json
 import re
 
 import streamlit as st
 
 from cellab.model import ValidationResult, to_json, validate_json
 from cellab.presets import preset_ids, preset_path
+from cellab.ui.build_form import (
+    builder_section,
+    clear_form_control,
+    init_form_state,
+    load_form,
+)
+from cellab.ui.builder import definition_from_form, form_from_definition
 from cellab.ui.components import inject_css, render_issues, render_summary, step_heading
 
 SOURCES = {"preset": "Known automata", "build": "Build", "json": "JSON"}
@@ -49,6 +57,7 @@ def init_state() -> None:
     ss.setdefault("source", "preset")
     ss.setdefault("preset_choice", DEFAULT_PRESET)
     ss.setdefault("json_draft", "")
+    init_form_state()
 
 
 def restore(widget_key: str, saved_key: str) -> None:
@@ -68,9 +77,32 @@ def _edit_preset_as_json() -> None:
     st.session_state.source = "json"
 
 
+def _edit_in_form(definition: dict) -> None:
+    form, _ = form_from_definition(definition)
+    load_form(form)
+    st.session_state.source = "build"
+
+
+def _edit_preset_in_form() -> None:
+    _edit_in_form(json.loads(preset_text(st.session_state.preset_choice)))
+
+
+def _edit_json_in_form() -> None:
+    _edit_in_form(json.loads(st.session_state.json_draft))
+
+
+def _edit_form_as_json() -> None:
+    data, _ = definition_from_form(st.session_state.form)
+    _set_json(json.dumps(data, indent=2) + "\n")
+    st.session_state.source = "json"
+
+
 def _on_source_change() -> None:
-    if st.session_state.source == "json" and not st.session_state.json_draft.strip():
+    source = st.session_state.source
+    if source == "json" and not st.session_state.json_draft.strip():
         _set_json(preset_text(st.session_state.preset_choice))
+    elif source == "build":
+        load_form(st.session_state.form)
 
 
 def _on_preset_change() -> None:
@@ -92,15 +124,19 @@ def _on_upload() -> None:
 
 def automaton_section() -> ValidationResult | None:
     step_heading(1, "Automaton")
-    source = st.segmented_control(
-        "Where the automaton comes from",
-        options=list(SOURCES),
-        format_func=SOURCES.get,
-        required=True,
-        key="source",
-        on_change=_on_source_change,
-        label_visibility="collapsed",
-    )
+    with st.container(horizontal=True, vertical_alignment="center"):
+        source = st.segmented_control(
+            "Where the automaton comes from",
+            options=list(SOURCES),
+            format_func=SOURCES.get,
+            required=True,
+            key="source",
+            on_change=_on_source_change,
+            label_visibility="collapsed",
+        )
+        if source == "build":
+            st.space("stretch")
+            clear_form_control()
 
     if source == "preset":
         restore("preset_id", "preset_choice")
@@ -111,19 +147,27 @@ def automaton_section() -> ValidationResult | None:
             key="preset_id",
             on_change=_on_preset_change,
         )
-        st.button(
-            "Edit as JSON",
-            on_click=_edit_preset_as_json,
-            help="Copy this definition to the JSON editor to change it.",
-        )
+        with st.container(horizontal=True):
+            st.button(
+                "Edit in the form",
+                on_click=_edit_preset_in_form,
+                help="Copy this definition to the form builder to change it.",
+            )
+            st.button(
+                "Edit as JSON",
+                on_click=_edit_preset_as_json,
+                help="Copy this definition to the JSON editor to change it.",
+            )
         return validate_json(preset_text(st.session_state.preset_choice))
 
     if source == "build":
-        st.info(
-            "The form builder is the next part being built. Meanwhile, start from a known "
-            "automaton or paste a JSON definition."
+        result, _ = builder_section()
+        st.button(
+            "Edit as JSON",
+            on_click=_edit_form_as_json,
+            help="Copy what the form produces to the JSON editor.",
         )
-        return None
+        return result
 
     st.file_uploader(
         "Upload a definition", type="json", key="upload", on_change=_on_upload, max_upload_size=1
@@ -141,7 +185,16 @@ def automaton_section() -> ValidationResult | None:
     text = st.session_state.json_draft
     if not text.strip():
         return None
-    return validate_json(text)
+    result = validate_json(text)
+    if result.ok:
+        _, reason = form_from_definition(json.loads(text))
+        st.button(
+            "Edit in the form",
+            on_click=_edit_json_in_form,
+            disabled=reason is not None,
+            help=reason or "Copy this definition to the form builder.",
+        )
+    return result
 
 
 def later_steps() -> None:
@@ -154,8 +207,8 @@ def later_steps() -> None:
 def definition_tab(result: ValidationResult | None) -> None:
     if result is None:
         st.markdown(
-            "No definition yet. Pick a known automaton, or paste or upload a JSON definition "
-            "on the left."
+            "No definition yet. Pick a known automaton, build one with the form, or paste or "
+            "upload a JSON definition on the left."
         )
         return
     render_issues(result)
@@ -180,7 +233,9 @@ def main() -> None:
     st.title("CelLab", anchor=False)
     st.caption("Choose or write a cellular automaton, check it, then run it.")
 
-    left, right = st.columns([2, 3], gap="large")
+    # building needs room for the tables; otherwise the result gets the wider column
+    ratio = [3, 2] if st.session_state.source == "build" else [2, 3]
+    left, right = st.columns(ratio, gap="large")
     with left:
         result = automaton_section()
         later_steps()

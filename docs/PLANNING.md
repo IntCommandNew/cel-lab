@@ -61,7 +61,7 @@ Built in chunks; each chunk ends with passing tests and is checked before the ne
 - [x] **Chunk 3 - Simulation & storage:** experiment parameters, history modes (all / every k /
       final), generation hashes, save run folder, reload, resume; integration tests (save -> load
       -> resume equals an uninterrupted run)
-- [ ] **Chunk 4 - GUI shell & definitions:** theme, layout, preset picker, JSON paste/upload with
+- [x] **Chunk 4 - GUI shell & definitions:** theme, layout, preset picker, JSON paste/upload with
       validation messages, readable summary of the definition; Streamlit `AppTest` tests
 - [ ] **Chunk 5 - GUI definition builder:** form for grid, states, neighbourhood and rules that
       produces the JSON (preview + download); `AppTest` tests

@@ -32,6 +32,10 @@ def texts(at):
     return "\n".join(parts)
 
 
+def button(at, label):
+    return next(b for b in at.button if b.label == label)
+
+
 def use_json(at, text):
     source(at).set_value("json").run()
     at.text_area(key="json_text").input(text).run()
@@ -67,7 +71,7 @@ def test_every_known_automaton_is_shown_without_errors(app, preset_id):
 
 def test_edit_as_json_copies_the_preset(app):
     app.selectbox(key="preset_id").set_value("rule-30").run()
-    app.button[0].click().run()
+    button(app, "Edit as JSON").click().run()
     assert source(app).value == "json"
     assert json.loads(app.text_area(key="json_text").value)["name"] == "Rule 30"
     assert "Elementary rule 30" in texts(app)
@@ -121,10 +125,11 @@ def test_empty_json_gives_directions(app):
     assert not app.error
 
 
-def test_build_option_says_what_to_do_meanwhile(app):
+def test_build_starts_from_a_blank_form(app):
     source(app).set_value("build").run()
-    assert "form builder" in app.info[0].value
     assert not app.exception
+    assert app.text_input(key="f_name").value == "My automaton"
+    assert "There are no rules" in app.warning[0].value
 
 
 # --- state handling (regressions found when running the app) --------------------------------
@@ -148,7 +153,7 @@ def streamlit_warnings():
 
 def test_interactions_do_not_trigger_state_warnings(app, streamlit_warnings):
     app.selectbox(key="preset_id").set_value("rule-30").run()
-    app.button[0].click().run()  # Edit as JSON
+    button(app, "Edit as JSON").click().run()
     source(app).set_value("preset").run()
     source(app).set_value("build").run()
     source(app).set_value("json").run()
@@ -169,3 +174,102 @@ def test_chosen_known_automaton_survives_switching_away(app):
     source(app).set_value("preset").run()
     assert app.selectbox(key="preset_id").value == "forest-fire"
     assert "Forest Fire" in [s.value for s in app.subheader]
+
+
+# --- form builder ---------------------------------------------------------------------------
+
+
+def group(at, key):
+    return next(b for b in at.get("button_group") if b.key == key)
+
+
+def open_in_form(at, preset_id):
+    at.selectbox(key="preset_id").set_value(preset_id).run()
+    button(at, "Edit in the form").click().run()
+    assert source(at).value == "build"
+    return at
+
+
+def test_known_automaton_opens_in_the_form(app):
+    open_in_form(app, "forest-fire")
+    assert app.text_input(key="f_name").value == "Forest Fire"
+    assert group(app, "f_boundary").value == "fixed"
+    assert app.selectbox(key="f_fixed").value == "empty"
+    assert "Forest Fire" in [s.value for s in app.subheader]
+    assert not app.error
+
+
+def test_form_changes_show_in_the_summary(app):
+    open_in_form(app, "game-of-life")
+    app.text_input(key="f_name").input("Small Life").run()
+    app.number_input(key="f_width").set_value(12).run()
+    group(app, "f_neighborhood").set_value("von_neumann").run()
+    shown = texts(app)
+    assert "Small Life" in [s.value for s in app.subheader]
+    assert "12 x 30, edges wrap around" in shown
+    assert "the 4 cells above, below, left and right" in shown
+
+
+def test_elementary_neighbourhood_asks_for_a_rule_number(app):
+    source(app).set_value("build").run()
+    group(app, "f_neighborhood").set_value("elementary").run()
+    app.number_input(key="f_code").set_value(90).run()
+    assert app.number_input(key="f_height").disabled
+    shown = texts(app)
+    assert "Elementary rule 90" in shown and "81" not in shown
+    assert not app.error
+
+
+def test_form_edits_survive_switching_away(app):
+    source(app).set_value("build").run()
+    app.text_input(key="f_name").input("Kept").run()
+    source(app).set_value("preset").run()
+    source(app).set_value("build").run()
+    assert app.text_input(key="f_name").value == "Kept"
+
+
+def test_form_to_json_and_back(app):
+    open_in_form(app, "brians-brain")
+    app.text_input(key="f_name").input("Brain v2").run()
+    button(app, "Edit as JSON").click().run()
+    assert source(app).value == "json"
+    assert json.loads(app.text_area(key="json_text").value)["name"] == "Brain v2"
+    button(app, "Edit in the form").click().run()
+    assert source(app).value == "build"
+    assert app.text_input(key="f_name").value == "Brain v2"
+
+
+def test_json_the_form_cannot_show_keeps_the_button_disabled(app):
+    data = json.loads(preset_path("game-of-life").read_text(encoding="utf-8"))
+    data["rules"][1]["when"] = {"all": [{"count": "alive", "eq": 3}, {"count": "dead", "ge": 1}]}
+    use_json(app, json.dumps(data))
+    edit = button(app, "Edit in the form")
+    assert edit.disabled
+    assert "combines several conditions" in edit.help
+
+
+def test_builder_flows_do_not_trigger_state_warnings(app, streamlit_warnings):
+    open_in_form(app, "rule-30")
+    group(app, "f_neighborhood").set_value("moore").run()
+    group(app, "f_boundary").set_value("wrap").run()
+    source(app).set_value("json").run()
+    source(app).set_value("build").run()
+    assert not app.exception
+    assert streamlit_warnings == []
+
+
+def test_clear_the_form_resets_only_the_form(app):
+    use_json(app, '{"name": "json draft"')
+    source(app).set_value("preset").run()
+    open_in_form(app, "forest-fire")
+    app.text_input(key="f_name").input("To be cleared").run()
+    next(b for b in app.button if b.key == "clear_form").click().run()
+    assert app.text_input(key="f_name").value == "My automaton"
+    assert group(app, "f_boundary").value == "wrap"
+    assert "My automaton" in [s.value for s in app.subheader]
+    assert "There are no rules" in app.warning[0].value
+    # the other sources keep their own state
+    source(app).set_value("preset").run()
+    assert app.selectbox(key="preset_id").value == "forest-fire"
+    source(app).set_value("json").run()
+    assert app.text_area(key="json_text").value == '{"name": "json draft"'

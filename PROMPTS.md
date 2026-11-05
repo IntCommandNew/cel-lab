@@ -518,3 +518,45 @@ all looks good. open a new PR.
 - **Result:** Committed chunk 4 (GUI shell: Streamlit app, theme, preset picker, JSON
   paste/upload with validation, state fixes, GUI tests, docs) on `feature/sprint2-gui-shell`,
   pushed it and opened a pull request into `main`.
+
+### 2026-11-05 20:46 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+the PR was merged.
+````
+
+- **Result:** Synced `main`, built chunk 5 on `feature/sprint2-gui-builder`: form builder (name,
+  grid, states table, default state, edges, neighbourhood, sentence-like rules table, elementary
+  rule number); "Edit in the form" from known automata and JSON, "Edit as JSON" from the form;
+  renaming a state renames it everywhere. Pure form logic in `ui/builder.py` (29 unit tests, every
+  preset round-trips), 11 new GUI tests (231 total), browser-checked incl. a rename. Uncommitted.
+
+### 2026-11-05 22:37 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+looks good and all 3 sections have their own 'memory', so working on one does't change another. I would like, however, to add a reset button on the build window to revert all the values to default for easy cleaning and introduction of a new automata. also, I would like to change the current red color we use to signal tha something is selected. it looks to much like an 'error' color and makes things confusing.
+````
+
+- **Result:** Accent changed from eosin red to methylene blue `#1F5FA6` (about 6.5:1 with white
+  text) so selections never look like errors; eosin stays a cell colour only. DESIGN.md palette and
+  rule updated. Added "Clear the form" (with confirmation, on the source selector row) that resets
+  only the builder; test confirms known automata and the JSON draft keep their state (232 tests).
+  Browser-checked.
+
+### 2026-11-05 22:44 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+all looks good. open a new PR.
+````
+
+- **Result:** Committed chunk 5 (form builder, Clear the form, methylene-blue accent, tests,
+  docs) on `feature/sprint2-gui-builder`, pushed it and opened a pull request into `main`.
