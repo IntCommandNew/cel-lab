@@ -55,7 +55,7 @@ Built in chunks; each chunk ends with passing tests and is checked before the ne
 - [x] **Chunk 1 - Model:** definition dataclasses + JSON load/save, validator (structural,
       reference, semantic checks with field paths), plain-English summary, presets (Game of Life,
       Brian's Brain, Rule 30, Forest Fire); unit tests
-- [ ] **Chunk 2 - Engine:** neighbour counting (Moore / von Neumann, wrap / fixed boundary),
+- [x] **Chunk 2 - Engine:** neighbour counting (Moore / von Neumann, wrap / fixed boundary),
       ordered rules, elementary (1D) rules, initial worlds (text grid, random with seed, centre
       cell); unit tests with known patterns (blinker, glider, Brian's Brain step, Rule 30 rows)
 - [ ] **Chunk 3 - Simulation & storage:** experiment parameters, history modes (all / every k /
