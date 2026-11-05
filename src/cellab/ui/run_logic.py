@@ -20,7 +20,7 @@ from cellab.model import Automaton
 
 MAX_IMAGE_PX = 720  # widest grid image, in pixels
 MAX_CELL_PX = 24
-GRID_LINE = (0xC9, 0xCE, 0xD9)  # graticule hairline, as in the theme's borderColor
+GRID_LINE = (0xE1, 0xE5, 0xEC)  # faint graticule: a guide, never stronger than the cells
 LINE_MIN_CELL_PX = 8  # draw cell borders only when cells are at least this big
 CHART_FALLBACK = "#7A8094"  # graticule grey for state colours too pale to see on the page
 
