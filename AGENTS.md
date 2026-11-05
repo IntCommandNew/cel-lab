@@ -63,7 +63,7 @@ python -m pytest                         # run tests
 ruff check . && ruff format .            # lint + format
 python tools/check_chars.py              # character rules (see below)
 npx markdownlint-cli2 "**/*.md" "#.venv"  # Markdown lint (needs Node.js; same rules as VS Code)
-streamlit run src/cellab/ui/app.py       # GUI (once it exists)
+streamlit run src/cellab/ui/app.py       # GUI
 ```
 
 ## Layout
@@ -121,6 +121,11 @@ custom CSS only where the theme is not enough.
 **Use `frontend-design` implicitly**, without being asked, whenever work touches UI/UX: GUI
 layout and styling, terminal output meant for people (CLI rendering, messages), visualisations
 (grid colours, charts) and interface wording (labels, buttons, errors).
+
+**Streamlit's official skill `developing-with-streamlit`** is installed per person, not in the
+repository: run `streamlit skills` once in the activated virtual environment. It loads reference
+docs that match the installed Streamlit version; use it for all Streamlit work (widgets, session
+state, theming, testing) together with `frontend-design`.
 
 ## Third-party files
 

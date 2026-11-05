@@ -58,7 +58,7 @@ Built in chunks; each chunk ends with passing tests and is checked before the ne
 - [x] **Chunk 2 - Engine:** neighbour counting (Moore / von Neumann, wrap / fixed boundary),
       ordered rules, elementary (1D) rules, initial worlds (text grid, random with seed, centre
       cell); unit tests with known patterns (blinker, glider, Brian's Brain step, Rule 30 rows)
-- [ ] **Chunk 3 - Simulation & storage:** experiment parameters, history modes (all / every k /
+- [x] **Chunk 3 - Simulation & storage:** experiment parameters, history modes (all / every k /
       final), generation hashes, save run folder, reload, resume; integration tests (save -> load
       -> resume equals an uninterrupted run)
 - [ ] **Chunk 4 - GUI shell & definitions:** theme, layout, preset picker, JSON paste/upload with
