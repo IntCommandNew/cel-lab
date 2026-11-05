@@ -156,3 +156,16 @@ all looks good. you can push all the changes to GitHub.
 - **Result:** Committed the whole project setup on a new branch `feature/project-setup` (team
   convention: no direct commits to `main`) and pushed it to GitHub, ready to be merged into `main`
   through a pull request.
+
+### 2026-11-05 18:29 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+open the pull request
+````
+
+- **Result:** Opened pull request #1 (`feature/project-setup` -> `main`):
+  <https://github.com/IntCommandNew/cel-lab/pull/1>, with a summary of the setup, the steps each
+  team member does after merging, and the checks that pass.
