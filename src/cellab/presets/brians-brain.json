@@ -1,0 +1,17 @@
+{
+  "name": "Brian's Brain",
+  "description": "Three states: firing cells always start dying, then switch off; an off cell fires when exactly two neighbours fire.",
+  "grid": { "width": 40, "height": 30, "boundary": "wrap" },
+  "states": [
+    { "name": "off", "symbol": ".", "color": "#F3F5F8" },
+    { "name": "firing", "symbol": "F", "color": "#D9467A" },
+    { "name": "dying", "symbol": "D", "color": "#8E86C9" }
+  ],
+  "default_state": "off",
+  "neighborhood": { "type": "moore", "radius": 1 },
+  "rules": [
+    { "from": "firing", "to": "dying" },
+    { "from": "dying", "to": "off" },
+    { "from": "off", "to": "firing", "when": { "count": "firing", "eq": 2 } }
+  ]
+}

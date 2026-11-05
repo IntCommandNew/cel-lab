@@ -1,0 +1,16 @@
+{
+  "name": "Forest Fire",
+  "description": "Deterministic version: fire burns out, and a tree catches fire when a neighbour burns.",
+  "grid": { "width": 40, "height": 30, "boundary": { "fixed": "empty" } },
+  "states": [
+    { "name": "empty", "symbol": ".", "color": "#F3F5F8" },
+    { "name": "tree", "symbol": "T", "color": "#4F9D69" },
+    { "name": "fire", "symbol": "F", "color": "#E8A33A" }
+  ],
+  "default_state": "empty",
+  "neighborhood": { "type": "moore", "radius": 1 },
+  "rules": [
+    { "from": "fire", "to": "empty" },
+    { "from": "tree", "to": "fire", "when": { "count": "fire", "ge": 1 } }
+  ]
+}
