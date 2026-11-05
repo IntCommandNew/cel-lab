@@ -560,3 +560,30 @@ all looks good. open a new PR.
 
 - **Result:** Committed chunk 5 (form builder, Clear the form, methylene-blue accent, tests,
   docs) on `feature/sprint2-gui-builder`, pushed it and opened a pull request into `main`.
+
+### 2026-11-05 22:58 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+the PR was merged.
+````
+
+- **Result:** Synced `main`, built chunk 6 on `feature/sprint2-gui-run`: initial world (random,
+  centre cell, text; default per automaton), run settings, Run / Continue / Save run, World tab
+  with the grid as hero (1D shown as space-time picture), generation slider, population chart with
+  legend, Saved runs tab. Pure helpers in `ui/run_logic.py` (9 unit tests), 9 new GUI tests (250
+  total), browser-reviewed and fixed (Continue button timing, slider position, chart legend).
+
+### 2026-11-05 23:24 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+open a new PR.
+````
+
+- **Result:** Committed chunk 6 (initial world, run, viewer, saved runs, tests, docs) on
+  `feature/sprint2-gui-run`, pushed it and opened a pull request into `main`.

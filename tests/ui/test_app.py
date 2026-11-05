@@ -25,10 +25,11 @@ def source(at):
 
 
 def texts(at):
-    """All visible text: markdown, html, subheaders, alerts."""
+    """All visible text: markdown, html, subheaders, alerts, captions."""
     parts = [m.value for m in at.markdown] + [h.value for h in at.get("html")]
     parts += [s.value for s in at.subheader] + [e.value for e in at.error]
     parts += [w.value for w in at.warning] + [i.value for i in at.info]
+    parts += [c.value for c in at.caption]
     return "\n".join(parts)
 
 
@@ -273,3 +274,110 @@ def test_clear_the_form_resets_only_the_form(app):
     assert app.selectbox(key="preset_id").value == "forest-fire"
     source(app).set_value("json").run()
     assert app.text_area(key="json_text").value == '{"name": "json draft"'
+
+
+# --- initial world, run, viewer, saved runs -------------------------------------------------
+
+
+def run_button(at):
+    return next(b for b in at.button if b.label.startswith("Run "))
+
+
+def headline(at):
+    return next(
+        m.value for m in at.markdown if m.value.startswith("**") and "generation" in m.value
+    )
+
+
+NOISY = {
+    "name": "Noisy",
+    "grid": {"width": 12, "height": 10},
+    "states": [
+        {"name": "off", "symbol": ".", "color": "#F3F5F8"},
+        {"name": "on", "symbol": "#", "color": "#2E2A5C"},
+    ],
+    "default_state": "off",
+    "rules": [{"from": "off", "to": "on", "probability": 0.1}, {"from": "on", "to": "off"}],
+}
+
+
+def test_world_tab_previews_the_initial_world(app):
+    assert app.tabs[0].label == "World"
+    assert "**Game of Life**: initial world, not run yet." in texts(app)
+    assert app.session_state["run"] is None if "run" in app.session_state else True
+
+
+def test_run_and_browse_generations(app):
+    assert run_button(app).label == "Run 50 generations"
+    run_button(app).click().run()
+    assert not app.exception
+    assert app.session_state["run"].last_generation == 50
+    assert headline(app) == "**Game of Life**: generation 50 of 50."
+    app.select_slider(key="run_view").set_value(10).run()
+    assert headline(app) == "**Game of Life**: generation 10 of 50."
+    assert "Cells per state at generation 10: dead" in texts(app)
+
+
+def test_continue_extends_the_run(app):
+    run_button(app).click().run()
+    button(app, "Continue for 50 generations").click().run()
+    assert app.session_state["run"].last_generation == 100
+    assert headline(app) == "**Game of Life**: generation 100 of 100."
+
+
+def test_save_and_open_a_run(app, tmp_path, monkeypatch):
+    monkeypatch.setenv("CELLAB_RUNS_DIR", str(tmp_path))
+    app.number_input(key="r_generations").set_value(12).run()
+    run_button(app).click().run()
+    button(app, "Save run").click().run()
+    assert "Saved as" in app.success[0].value
+    assert len(list(tmp_path.iterdir())) == 1
+    run_button(app).click().run()  # a new run replaces the shown one
+    button(app, "Open run").click().run()
+    assert not app.exception
+    assert app.session_state["run"].last_generation == 12
+    assert "Opened" in app.success[0].value
+
+
+def test_one_dimensional_automata_start_from_a_centre_cell(app):
+    app.selectbox(key="preset_id").set_value("rule-30").run()
+    assert group(app, "w_kind").value == "centre"
+    run_button(app).click().run()
+    assert headline(app) == "**Rule 30**: generation 50 of 50."
+    assert "time runs downwards" in texts(app)
+
+
+def test_text_world_errors_disable_running(app):
+    group(app, "w_kind").set_value("text").run()
+    app.text_area(key="w_text").input("#x#").run()
+    assert "unknown symbols x" in app.error[0].value
+    assert run_button(app).disabled
+
+
+def test_random_rules_ask_for_a_seed_and_show_only_stored_generations(app):
+    use_json(app, json.dumps(NOISY))
+    assert app.number_input(key="r_seed").value == 1
+    group(app, "r_history").set_value("final").run()
+    run_button(app).click().run()
+    assert not app.exception
+    assert app.select_slider(key="run_view").options == ["0", "50"]
+    assert "only the stored generations can be shown" in texts(app)
+
+
+def test_changing_the_automaton_after_a_run_is_pointed_out(app):
+    run_button(app).click().run()
+    app.selectbox(key="preset_id").set_value("brians-brain").run()
+    assert "This run used a different automaton" in app.info[0].value
+
+
+def test_run_flows_do_not_trigger_state_warnings(app, streamlit_warnings, tmp_path, monkeypatch):
+    monkeypatch.setenv("CELLAB_RUNS_DIR", str(tmp_path))
+    group(app, "w_kind").set_value("centre").run()
+    group(app, "r_history").set_value("every").run()
+    run_button(app).click().run()
+    app.select_slider(key="run_view").set_value(20).run()
+    source(app).set_value("json").run()
+    source(app).set_value("preset").run()
+    assert group(app, "w_kind").value == "centre"  # kept while the step was redrawn
+    assert not app.exception
+    assert streamlit_warnings == []

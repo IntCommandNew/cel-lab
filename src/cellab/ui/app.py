@@ -12,9 +12,10 @@ from __future__ import annotations
 import json
 import re
 
+import numpy as np
 import streamlit as st
 
-from cellab.model import ValidationResult, to_json, validate_json
+from cellab.model import Automaton, ValidationResult, to_json, validate_json
 from cellab.presets import preset_ids, preset_path
 from cellab.ui.build_form import (
     builder_section,
@@ -24,6 +25,7 @@ from cellab.ui.build_form import (
 )
 from cellab.ui.builder import definition_from_form, form_from_definition
 from cellab.ui.components import inject_css, render_issues, render_summary, step_heading
+from cellab.ui.run_panel import run_section, saved_runs_tab, world_section, world_tab
 
 SOURCES = {"preset": "Known automata", "build": "Build", "json": "JSON"}
 DEFAULT_PRESET = "game-of-life"
@@ -197,11 +199,20 @@ def automaton_section() -> ValidationResult | None:
     return result
 
 
-def later_steps() -> None:
+def later_steps(automaton: Automaton | None) -> np.ndarray | None:
+    """Steps 2 and 3; returns the initial world (for the preview), or None."""
     step_heading(2, "Initial world")
-    st.caption("Next: choose, generate or draw the starting world.")
+    if automaton is None:
+        st.caption("Choose a valid automaton first.")
+        world = None
+    else:
+        world, setting = world_section(automaton)
     step_heading(3, "Run")
-    st.caption("Next: number of generations, which generations to keep, and run.")
+    if automaton is None:
+        st.caption("Choose a valid automaton first.")
+    else:
+        run_section(automaton, world, setting)
+    return world
 
 
 def definition_tab(result: ValidationResult | None) -> None:
@@ -238,14 +249,18 @@ def main() -> None:
     left, right = st.columns(ratio, gap="large")
     with left:
         result = automaton_section()
-        later_steps()
-    st.session_state.automaton = result.automaton if result is not None else None
+        automaton = result.automaton if result is not None else None
+        preview = later_steps(automaton)
     with right:
-        definition, json_view = st.tabs(["Definition", "JSON"])
+        world, definition, json_view, saved = st.tabs(["World", "Definition", "JSON", "Saved runs"])
+        with world:
+            world_tab(automaton, preview)
         with definition:
             definition_tab(result)
         with json_view:
             json_tab(result)
+        with saved:
+            saved_runs_tab()
 
 
 main()

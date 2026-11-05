@@ -63,7 +63,7 @@ Built in chunks; each chunk ends with passing tests and is checked before the ne
       -> resume equals an uninterrupted run)
 - [x] **Chunk 4 - GUI shell & definitions:** theme, layout, preset picker, JSON paste/upload with
       validation messages, readable summary of the definition; Streamlit `AppTest` tests
-- [ ] **Chunk 5 - GUI definition builder:** form for grid, states, neighbourhood and rules that
+- [x] **Chunk 5 - GUI definition builder:** form for grid, states, neighbourhood and rules that
       produces the JSON (preview + download); `AppTest` tests
 - [ ] **Chunk 6 - GUI run & inspect:** initial world, run parameters, run, grid viewer with
       generation slider, population chart, save / load runs; `AppTest` tests + manual check
