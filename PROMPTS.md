@@ -299,3 +299,30 @@ the working folder was my mistake. you can open a PR now.
 
 - **Result:** Committed chunk 1 (model, validator, summary, presets, tests) with the planning and
   documentation updates on `feature/sprint2-core`, pushed it and opened a pull request into `main`.
+
+### 2026-11-05 19:41 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+the PR was merged.
+````
+
+- **Result:** Synced `main`, started chunk 2 on `feature/sprint2-engine`: `cellab.engine`
+  (neighbour counting with wrap/fixed padding, ordered rules with probabilistic fall-through,
+  elementary rules, initial worlds: text grid, random with seed, centre cell). 141 tests pass,
+  incl. a naive loop-based reference the engine must match; ~10-16 ms per 500x500 generation.
+  DESIGN.md semantics updated, chunk 1 ticked. Uncommitted, waiting for review.
+
+### 2026-11-05 19:50 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+open a PR
+````
+
+- **Result:** Committed chunk 2 (engine, world generation, tests, DESIGN/PLANNING updates) on
+  `feature/sprint2-engine`, pushed it and opened a pull request into `main`.

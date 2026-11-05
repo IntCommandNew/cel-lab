@@ -103,10 +103,12 @@ Implemented in `cellab.model` (dataclasses in `definition.py`, checks in `valida
 
 1. Rules are checked **in order**; the **first** rule whose `from` matches the cell and whose
    condition holds decides the new state.
-2. A cell matched by **no rule keeps its state.**
-3. All conditions are evaluated on the **previous generation** (synchronous update;
+2. A **probabilistic** rule decides the cell only when its random draw succeeds; otherwise the next
+   rules are still considered. Draws come from a seeded generator, so runs are reproducible.
+3. A cell matched by **no rule keeps its state.**
+4. All conditions are evaluated on the **previous generation** (synchronous update;
    order-independent).
-4. Grid cells store state **indices** (`uint8`); names/symbols/colours are presentation only.
+5. Grid cells store state **indices** (`uint8`); names/symbols/colours are presentation only.
 
 ## 4. Validation
 
@@ -124,8 +126,13 @@ user).
 
 ## 5. Initial world
 
-- **Manual:** a text grid using the state symbols (e.g. `. . F . .`), editable in the GUI.
-- **Random:** each cell gets a state with given probabilities, from an explicit `seed`.
+- **Manual:** a text grid using the state symbols (e.g. `. . F . .`, spaces optional), editable in
+  the GUI. It may be smaller than the grid: it is placed at a given row/column, or centred on cell
+  `(height // 2, width // 2)`, with the default state everywhere else.
+- **Random:** each cell gets a state with given probabilities (the rest goes to the default
+  state), from an explicit `seed`.
+- **Centre cell:** the default world with one cell of a chosen state at `(height // 2,
+  width // 2)`, e.g. Rule 30's starting row.
 - **Patterns:** named patterns (single centre cell, glider, blinker, ...) placed at coordinates on
   top of a background (default state or random).
 - Combinable: generate, then edit by hand. The result must match the grid size and declared states.
