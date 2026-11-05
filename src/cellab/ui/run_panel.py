@@ -20,6 +20,7 @@ from cellab.model import Automaton
 from cellab.storage import DEFAULT_ROOT, StorageError, list_runs, load_run, save_run
 from cellab.ui.components import swatch
 from cellab.ui.run_logic import (
+    DEFAULT_PLAY_DELAY,
     PLAY_DELAYS,
     build_world,
     chart_colors,
@@ -27,6 +28,7 @@ from cellab.ui.run_logic import (
     generations_label,
     neighbour_view,
     next_view,
+    png_data_uri,
     render,
     space_time,
 )
@@ -187,7 +189,7 @@ def run_section(automaton: Automaton, world: np.ndarray | None, setting: dict) -
                 ss.run_context = (automaton, setting)
                 stop_playback()
                 show_world_tab()
-                ss.run_view = None  # show the last generation
+                ss.view_gen = None  # show the last generation
                 ss.run_notice = None
             except SimulationError as exc:
                 st.error(str(exc))
@@ -197,7 +199,7 @@ def run_section(automaton: Automaton, world: np.ndarray | None, setting: dict) -
             try:
                 with st.spinner("Running..."):
                     run.advance(int(generations))
-                ss.run_view = None
+                ss.view_gen = None
                 show_world_tab()
             except SimulationError as exc:
                 st.error(str(exc))
@@ -215,7 +217,12 @@ def run_section(automaton: Automaton, world: np.ndarray | None, setting: dict) -
 
 
 def _show_grid(automaton: Automaton, grid: np.ndarray, alt: str) -> None:
-    st.image(render(automaton, grid), alt=alt)
+    image = render(automaton, grid)
+    height, width = image.shape[:2]
+    st.html(
+        f'<img class="cl-grid" src="{png_data_uri(image)}" width="{width}" height="{height}" '
+        f'alt="{html.escape(alt)}">'
+    )
 
 
 def show_world_tab() -> None:
@@ -234,28 +241,36 @@ def _view_options(run) -> list[int]:
     return run.stored_generations
 
 
-def _play_pause() -> None:
+# Play / Pause / Skip change whether the player's timer runs, which needs a full rerun. They are
+# handled from the button's return value with st.rerun() in the script body, not from on_click
+# callbacks: calling st.rerun() inside a callback sometimes lost the click in the browser (after
+# the delay had been changed).
+
+
+def _toggle_play() -> None:
     ss = st.session_state
     if ss.play_state == "playing":
         ss.play_state = "paused"
     else:
         options = _view_options(ss.run)
-        if ss.run_view == options[-1]:  # at the end: play again from the start
-            ss.run_view = options[0]
+        if ss.view_gen == options[-1]:  # at the end: play again from the start
+            ss.view_gen = options[0]
         ss.play_state = "playing"
-    st.rerun()  # full rerun, so the timer of the player starts or stops
 
 
 def _skip_to_end() -> None:
     ss = st.session_state
-    ss.run_view = _view_options(ss.run)[-1]
+    ss.view_gen = _view_options(ss.run)[-1]
     ss.play_state = "stopped"
-    st.rerun()
 
 
 def _step(step: int) -> None:
     ss = st.session_state
-    ss.run_view = neighbour_view(_view_options(ss.run), ss.run_view, step)
+    ss.view_gen = neighbour_view(_view_options(ss.run), ss.view_gen, step)
+
+
+def _on_slider() -> None:
+    st.session_state.view_gen = st.session_state.run_view
 
 
 def _player() -> None:
@@ -264,15 +279,15 @@ def _player() -> None:
     run = ss.run
     a = run.automaton
     options = _view_options(run)
-    if ss.get("run_view") not in options:
-        ss.run_view = options[-1]
+    if ss.get("view_gen") not in options:
+        ss.view_gen = options[-1]
     playing = ss.play_state == "playing"
     if playing:
-        ss.run_view, at_end = next_view(options, ss.run_view)
+        ss.view_gen, at_end = next_view(options, ss.view_gen)
         if at_end:
             ss.play_state = "stopped"
             st.rerun()  # stop the timer
-    g = ss.run_view
+    g = ss.view_gen
     last = run.last_generation
 
     st.markdown(f"**{a.name}**: generation {g} of {last}.")
@@ -293,13 +308,21 @@ def _player() -> None:
                 args=(-1,),
                 disabled=playing or g == options[0],
             )
-            st.select_slider(
-                "Generation",
-                options,
-                key="run_view",
-                disabled=playing,
-                label_visibility="collapsed",
-            )
+            if playing:
+                # No slider widget while playing: the browser would send back its own, older
+                # position with the next click (e.g. Skip) and undo the server's change.
+                st.progress(options.index(g) / (len(options) - 1), width="stretch")
+            else:
+                # always set: a slider that was hidden during playback is drawn anew and would
+                # otherwise start at its default position (generation 0) in the browser
+                ss.run_view = g
+                st.select_slider(
+                    "Generation",
+                    options,
+                    key="run_view",
+                    on_change=_on_slider,
+                    label_visibility="collapsed",
+                )
             st.button(
                 "",
                 icon=":material/chevron_right:",
@@ -312,21 +335,24 @@ def _player() -> None:
         with st.container(horizontal=True, vertical_alignment="bottom"):
             label = {"playing": "Pause", "paused": "Resume"}.get(ss.play_state, "Play")
             icon = ":material/pause:" if playing else ":material/play_arrow:"
-            st.button(label, icon=icon, key="play_pause", on_click=_play_pause)
-            st.button(
+            if st.button(label, icon=icon, key="play_pause"):
+                _toggle_play()
+                st.rerun()  # full rerun, so the player's timer starts or stops
+            if st.button(
                 "Skip to the end",
                 icon=":material/skip_next:",
                 key="skip_end",
-                on_click=_skip_to_end,
                 disabled=g == options[-1],
-            )
+            ):
+                _skip_to_end()
+                st.rerun()
             st.select_slider(
                 "Delay between generations",
                 PLAY_DELAYS,
                 format_func=lambda d: f"{d:g} s",
                 disabled=playing,
                 help="Change it before playing or while paused.",
-                **keep("play_delay", 0.2),
+                **keep("play_delay", DEFAULT_PLAY_DELAY),
             )
 
     table = run.population_table()
@@ -361,7 +387,7 @@ def world_tab(
             "This run used a different automaton than the one on the left. Run again to "
             "simulate the current one."
         )
-    delay = ss.get("_saved_play_delay", 0.2)
+    delay = ss.get("_saved_play_delay", DEFAULT_PLAY_DELAY)
     st.fragment(_player, run_every=delay if ss.play_state == "playing" else None)()
 
     table = run.population_table()
@@ -397,7 +423,7 @@ def _open_run(folder: str) -> None:
         ss.run_context = ss.get("current_context")
         stop_playback()
         show_world_tab()
-        ss.run_view = None
+        ss.view_gen = None
         ss.run_notice = f"Opened {os.path.basename(folder)}."
     except StorageError as exc:
         ss.run_notice = None

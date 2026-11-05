@@ -9,7 +9,11 @@ A world setting is a plain dict, also stored with saved runs as their `world_sou
 
 from __future__ import annotations
 
+import base64
+import io
+
 import numpy as np
+from PIL import Image
 
 from cellab.engine import Run, centre_cell, empty_world, random_world, world_from_text
 from cellab.model import Automaton
@@ -85,7 +89,9 @@ def generations_label(n: int) -> str:
 
 # --- playback -------------------------------------------------------------------------------
 
-PLAY_DELAYS = (0.1, 0.2, 0.5, 1.0, 2.0)  # seconds between generations
+# Seconds between generations. Below 0.2 s the browser cannot keep up with the redraws.
+PLAY_DELAYS = (0.2, 0.3, 0.5, 1.0, 2.0)
+DEFAULT_PLAY_DELAY = 0.3
 
 
 def next_view(options: list[int], current: int) -> tuple[int, bool]:
@@ -100,3 +106,11 @@ def neighbour_view(options: list[int], current: int, step: int) -> int:
     """The generation one position before (step=-1) or after (step=+1) `current`."""
     i = options.index(current) if current in options else 0
     return options[max(0, min(len(options) - 1, i + step))]
+
+
+def png_data_uri(image: np.ndarray) -> str:
+    """The image as an inline PNG (`data:` URI). Embedded in the page, it cannot be missing when
+    the next generation replaces it, unlike a separately served image file during playback."""
+    buffer = io.BytesIO()
+    Image.fromarray(image).save(buffer, format="PNG", optimize=True)
+    return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")

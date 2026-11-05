@@ -627,3 +627,48 @@ open a new PR.
 
 - **Result:** Committed the playback and viewer improvements on `feature/gui-playback`, pushed
   them and opened a pull request into `main`.
+
+### 2026-11-06 00:13 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+[Image #7]
+if i skip to the end while the animation is playing it tells me I got to the end, but I just paused the animation at the current generation while the slider tells me I'm at the end. I have to press skip a second time to actually get to the end. If I pause first, then I press skip, I'm put correctly at the end.
+````
+
+- **Pasted:** [Image #7] screenshot of the World tab for Rule 30 after pressing Skip during
+  playback: the headline says "generation 9 of 100" and the space-time picture shows 9 rows, while
+  the generation slider is at 100 and Skip is still enabled.
+- **Result:** Reproduced in a real browser (6 of 6 tries): during playback the browser kept an old
+  slider position and sent it back with the Skip click, undoing it. Fix on `fix/skip-while-playing`:
+  the shown generation lives in `view_gen`; while playing the slider is replaced by a progress bar.
+  Browser re-check 8 of 8 correct; regression test added (259 tests). DESIGN.md updated.
+
+### 2026-11-06 00:28 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+now it goes to the end, true. but the bar now is set to 0 some times, while other times is set to the actual generation were it was paused. the 0.1 speed is also to fast and the image doesn't load some times, so it just displays the image icon fallback. we should cap the speed at 0.2 or 0.3
+````
+
+- **Result:** Reproduced in the browser and fixed: the slider reappeared at 0 after a pause (now
+  always set when drawn); broken image icons at high speed (grid now an inline PNG); delays now
+  0.2-2 s, default 0.3 s. Also found and fixed lost Play clicks after a delay change (Play/Skip
+  now rerun from the script body, not from callbacks). Browser checks: 0 failures in 12 + 6 + 14
+  tries; 261 tests. Pillow declared in pyproject.toml; DESIGN.md updated.
+
+### 2026-11-06 00:50 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+open a new PR.
+````
+
+- **Result:** Committed the playback fixes on `fix/skip-while-playing`, pushed them and opened a
+  pull request into `main`.
