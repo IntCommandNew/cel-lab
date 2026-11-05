@@ -94,6 +94,7 @@ cel-lab/
 |-- data/              # generated runs and datasets (git-ignored)
 |-- docs/              # specification summary, design, sprint planning
 |-- tools/             # developer tooling: prompt-logging hook, character checker
+|-- .streamlit/        # GUI theme (colours, fonts)
 |-- .claude/           # shared Claude Code settings (permissions, hooks)
 |-- .github/           # GitHub Copilot instructions + hooks
 |-- .vscode/           # shared VS Code settings and recommended extensions
@@ -109,6 +110,10 @@ Requirements: **Python 3.11+** and **Git**.
 Run every command below from the repository folder (`cel-lab`). Once the virtual environment is
 activated, `python` and `pip` refer to it. Without activating it, call it by path: in PowerShell
 `.\.venv\Scripts\python -m pytest` (note the leading `.\`).
+
+If PowerShell says *running scripts is disabled on this system* when activating, allow local
+scripts for your user once with `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, or use the
+Command Prompt activation below.
 
 ```bash
 git clone https://github.com/IntCommandNew/cel-lab.git
@@ -130,7 +135,7 @@ pip install -e ".[dev,ml]"     # ... plus PyTorch for the NN experiment
 > The commands below become available as the corresponding sprints are completed.
 
 ```bash
-streamlit run src/cellab/ui/app.py   # start the graphical interface (Sprint 3)
+streamlit run src/cellab/ui/app.py   # start the graphical interface
 python -m pytest                     # run the test suite
 ruff check . && ruff format .        # lint and format
 python tools/check_chars.py          # character rules (keyboard characters only in code/Markdown)
@@ -170,6 +175,10 @@ git config cellab.author "Your Full Name"
 
 Without it, your `git config user.name` is used. Restart Claude Code / reload VS Code after pulling
 hook changes.
+
+Optionally, run `streamlit skills` once (in the activated virtual environment) to install
+Streamlit's official assistant skill for your user; it gives the assistants documentation that
+matches the installed Streamlit version.
 
 **Copilot notes:**
 

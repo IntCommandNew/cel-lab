@@ -227,7 +227,52 @@ Testing: a corpus of description -> expected-definition pairs, plus a round-trip
   Baselines: "copy previous state", majority state. Compare difficulty across automata.
 - Lives in `experiments/`; the app does not depend on it.
 
-## 11. Main decisions (summary)
+## 11. Graphical interface
+
+Implemented in `cellab.ui` with Streamlit (`app.py`, `components.py`); theme in
+`.streamlit/config.toml`. Designed with the `frontend-design` skill (see `AGENTS.md`).
+
+**Audience and job.** The team and the evaluators, often on a projector: turn a description into a
+running world and ask questions about it. Legibility from a distance matters more than density.
+
+**Direction: a stained microscope slide.** The subject is literally cells, so the palette comes
+from histology stains rather than from a generic app kit:
+
+| Token | Hex | Role |
+| --- | --- | --- |
+| Slide glass | `#F3F5F8` | page background, empty / dead cells |
+| Deep glass | `#E6E9F0` | inputs, code blocks |
+| Hematoxylin | `#2E2A5C` | all text, the main living state |
+| Eosin | `#C2306A` | the only accent: primary actions, selected controls (darkened from `#D9467A`, still used for cells, so white text reaches about 5:1 contrast) |
+| Orange G / Light Green SF | `#E8A33A` / `#4F9D69` | further state colours (fire, tree) |
+| Graticule | `#7A8094` | hairlines, step numbers, secondary text |
+
+**Type.** Atkinson Hyperlegible Next (body and headings) and Atkinson Hyperlegible Mono (JSON,
+state symbols), from Google Fonts with system fallbacks. Designed for legibility, with clearly
+distinct digits, which matters for counts read from the back of a room.
+
+**Layout.**
+
+```text
+CelLab
+Choose or write a cellular automaton, check it, then run it.
+
+1 Automaton                          [ Definition | JSON ]   (later: World first)
+  [Known automata | Build | JSON]     name, description
+  preset picker / form / JSON editor  Grid, Neighbours, States (colour swatches)
+2 Initial world                       Rules, numbered: their order matters
+3 Run                                 (later: the grid as the large hero, generation slider)
+```
+
+- The left column holds the steps in order; they are a real sequence, so they are numbered (quiet
+  graticule numerals). The right column shows the result; later the grid becomes its hero.
+- Every source of a definition (known automaton, form, JSON, later natural language) produces the
+  same JSON and goes through the same validator. Errors and warnings name the field and say how to
+  fix it; warnings never block.
+- Restraint: no cards, shadows, gradients, all-caps labels or emojis; one accent colour.
+- Review rule: check new screens in a real browser (desktop and phone width) before merging.
+
+## 12. Main decisions (summary)
 
 | Decision | Choice |
 | --- | --- |
@@ -238,3 +283,4 @@ Testing: a corpus of description -> expected-definition pairs, plus a round-trip
 | Analysis | All five questions |
 | Scope | Finite, synchronous grids with explicit boundaries; agents/numeric cells only as stretch goals |
 | Stack | Python, NumPy, Streamlit, JSON + npz files, pytest, ruff; PyTorch only for D3 |
+| GUI | Streamlit, "stained slide" theme, steps on the left, result on the right |

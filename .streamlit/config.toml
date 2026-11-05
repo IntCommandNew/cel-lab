@@ -1,0 +1,28 @@
+# CelLab GUI theme - "stained slide" direction (see docs/DESIGN.md, GUI section).
+# Palette from histology stains: slide glass, hematoxylin, eosin. Fonts load from Google Fonts;
+# without internet Streamlit falls back to the default sans-serif.
+
+[theme]
+base = "light"
+# Eosin, darkened from #D9467A so white button text has a contrast of about 5:1.
+# The only accent: primary buttons, selected controls, focus.
+primaryColor = "#C2306A"
+# Slide glass (page) and a slightly deeper glass (inputs, code blocks).
+backgroundColor = "#F3F5F8"
+secondaryBackgroundColor = "#E6E9F0"
+# Hematoxylin: all text.
+textColor = "#2E2A5C"
+linkColor = "#C2306A"
+# Graticule grey: hairlines.
+borderColor = "#C9CED9"
+showWidgetBorder = true
+baseRadius = "small"
+font = "Atkinson Hyperlegible Next:https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap, sans-serif"
+codeFont = "Atkinson Hyperlegible Mono:https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;700&display=swap, monospace"
+headingFontWeights = 700
+
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false

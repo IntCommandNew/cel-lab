@@ -353,3 +353,168 @@ open a PR
 
 - **Result:** Committed chunk 3 (simulation, run storage, tests, DESIGN/PLANNING updates) on
   `feature/sprint2-storage`, pushed it and opened a pull request into `main`.
+
+### 2026-11-05 20:01 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+the PR was merged.
+````
+
+- **Result:** Synced `main`, built chunk 4 on `feature/sprint2-gui-shell` with the frontend-design
+  skill: Streamlit app (`cellab.ui`: steps on the left, Definition/JSON tabs on the right), "stained
+  slide" theme in `.streamlit/config.toml`, preset picker, JSON paste/upload with field-level
+  errors/warnings, summary with colour swatches, JSON download. Reviewed in Edge screenshots (desktop
+  and phone width) and fixed spacing/contrast issues. 14 AppTest GUI tests, 192 in total. DESIGN.md
+  GUI section added, chunk 3 ticked. Uncommitted, waiting for review.
+
+### 2026-11-05 20:20 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+how do I activate the virtual environment?
+````
+
+- **Result:** Explained activation: `.\.venv\Scripts\Activate.ps1` in PowerShell (the execution
+  policy is unset, so `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` is likely needed once),
+  `activate.bat` in cmd, or calling tools by path. Added the execution-policy note to the README.
+
+### 2026-11-05 20:31 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+
+
+<pasted_content id="7282">
+PS C:\Main\LinesOfCode\cel-lab> python -m venv .venv
+PS C:\Main\LinesOfCode\cel-lab> .\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1 : File C:\Main\LinesOfCode\cel-lab\.venv\Scripts\Activate.ps1 cannot be loaded
+because running scripts is disabled on this system. For more information, see about_Execution_Policies at
+https:/go.microsoft.com/fwlink/?LinkID=135170.
+At line:1 char:1
++ .\.venv\Scripts\Activate.ps1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : SecurityError: (:) [], PSSecurityException
+    + FullyQualifiedErrorId : UnauthorizedAccess
+PS C:\Main\LinesOfCode\cel-lab> cmd
+Microsoft Windows [Version 10.0.26300.9711]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Main\LinesOfCode\cel-lab>.venv\Scripts\activate.bat
+
+(.venv) C:\Main\LinesOfCode\cel-lab>streamlit run src/cellab/ui/app.py
+
+      👋 Welcome to Streamlit!
+
+      If you'd like to receive helpful onboarding emails, news, offers, promotions,
+      and the occasional swag, please enter your email address below. Otherwise,
+      leave this field blank.
+
+      Email:
+
+  You can find our privacy policy at https://streamlit.io/privacy-policy
+
+  Summary:
+  - This open source library collects usage statistics.
+  - We cannot see and do not store information contained inside Streamlit apps,
+    such as text, charts, images, etc.
+  - Telemetry data is stored in servers in the United States.
+  - If you'd like to opt out, add the following to %userprofile%/.streamlit/config.toml,
+    creating that file if necessary:
+
+    [browser]
+    gatherUsageStats = false
+
+2026-11-05 20:24:53.496 Uvicorn server started on :::8501
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://192.168.1.13:8501
+
+  Help agents write better Streamlit apps?
+  Install the official Streamlit skills by running streamlit skills in your terminal.
+
+
+⚠ Symlinks not supported on this system.
+Project install uses symlinks so skills stay matched to your active Streamlit environment.
+Falling back to global installation. On Windows, enable Developer Mode to use project installs.
+
+
+✓ Installed:
+  → ~\.agents\skills\developing-with-streamlit
+  → ~\.claude\skills\developing-with-streamlit
+
+✨ Successfully installed globally
+
+Note: Global skills include a discover.py script that finds
+      project-specific bundled skills at runtime.
+2026-11-05 20:28:54.026 The widget with key "source" was created with a default value but also had its value set via the Session State API.
+Stack (most recent call last):
+  File "C:\Users\iacob\AppData\Local\Programs\Python\Python313\Lib\threading.py", line 1015, in _bootstrap
+    self._bootstrap_inner()
+  File "C:\Users\iacob\AppData\Local\Programs\Python\Python313\Lib\threading.py", line 1044, in _bootstrap_inner
+    self.run()
+  File "C:\Users\iacob\AppData\Local\Programs\Python\Python313\Lib\threading.py", line 995, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 436, in _run_script_thread
+    self._run_script(request.rerun_data)
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 949, in _run_script
+    ) = exec_func_with_error_handling(code_to_exec, ctx)
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\runtime\scriptrunner\exec_code.py", line 136, in exec_func_with_error_handling
+    result = func()
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 924, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+  File "C:\Main\LinesOfCode\cel-lab\src\cellab\ui\app.py", line 159, in <module>
+    main()
+  File "C:\Main\LinesOfCode\cel-lab\src\cellab\ui\app.py", line 148, in main
+    result = automaton_section()
+  File "C:\Main\LinesOfCode\cel-lab\src\cellab\ui\app.py", line 64, in automaton_section
+    source = st.segmented_control(
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\runtime\metrics_util.py", line 725, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\elements\widgets\button_group.py", line 1171, in segmented_control
+    return self._internal_button_group(
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\runtime\metrics_util.py", line 725, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\elements\widgets\button_group.py", line 1329, in _internal_button_group
+    result: RegisterWidgetResult[Any] = self._button_group(
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\elements\widgets\button_group.py", line 1429, in _button_group
+    check_widget_policies(self.dg, key, on_change_callback, default_value=_default)
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\elements\lib\policies.py", line 146, in check_widget_policies
+    check_session_state_rules(
+  File "C:\Main\LinesOfCode\cel-lab\.venv\Lib\site-packages\streamlit\elements\lib\policies.py", line 90, in check_session_state_rules
+    _LOGGER.warning(
+  Stopping...
+
+(.venv) C:\Main\LinesOfCode\cel-lab>
+</pasted_content id="7282">
+````
+
+- **Pasted:** text - a terminal session (PowerShell then cmd), included in full in the prompt
+  above: activation blocked by the execution policy, cmd activation, Streamlit's first-run
+  prompts, `streamlit skills` installing a global skill, and a session-state warning.
+- **Result:** Fixed the warning (the `source` widget had a default and was also set from code):
+  state is initialised once, without widget defaults. Also fixed a related bug found while reading
+  the code: JSON edits and the chosen preset were lost when switching sources. Alerts now use
+  `title=`. 3 regression tests (195 total), checked in a real browser. Documented the per-user
+  `streamlit skills` install in AGENTS.md and README.
+
+### 2026-11-05 20:42 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+all looks good. open a new PR.
+````
+
+- **Result:** Committed chunk 4 (GUI shell: Streamlit app, theme, preset picker, JSON
+  paste/upload with validation, state fixes, GUI tests, docs) on `feature/sprint2-gui-shell`,
+  pushed it and opened a pull request into `main`.
