@@ -241,7 +241,8 @@ from histology stains rather than from a generic app kit:
 | Token | Hex | Role |
 | --- | --- | --- |
 | Slide glass | `#F3F5F8` | page background, empty / dead cells |
-| Deep glass | `#E6E9F0` | inputs, code blocks |
+| Cover slip | `#FFFFFF` | input fields, code blocks and the world stage (white on the glass page) |
+| Hairline | `#D5DAE3` | borders, step separators; cell lines in the grid are fainter (`#E1E5EC`) |
 | Hematoxylin | `#2E2A5C` | all text, the main living state |
 | Methylene blue | `#1F5FA6` | the only accent: primary actions, selected controls, focus (white text about 6.5:1). Replaced eosin (`#C2306A`) because a red accent made selections look like errors |
 | Eosin | `#D9467A` | a state colour only (e.g. firing cells), never for interface controls |
@@ -309,6 +310,13 @@ Choose or write a cellular automaton, check it, then run it.
   Elementary automata ask for a rule number instead of a rules table. The form logic
   (`ui/builder.py`) is pure Python and unit-tested; any definition the form can show survives
   definition -> form -> definition unchanged. The left column widens while building.
+- **Visual refinement** (after the Sprint 2 preview): a compact header with a glider mark (the
+  five cells of Life's best-known pattern) beside the wordmark; steps separated by hairlines;
+  white fields; the World tab's content on a single white **stage** with a hairline border (the
+  only framed surface), headed by the automaton name and *Generation g of n*; playback
+  controls in one row with the delay as a segmented control; one line that is both legend and
+  counts (swatch in the real cell colour, state, number); the population chart drawn with
+  Altair in the page's font, without its own legend.
 - Restraint: no cards, shadows, gradients, all-caps labels or emojis; one accent colour, never
   red (red is reserved for errors).
 - Review rule: check new screens in a real browser (desktop and phone width) before merging.

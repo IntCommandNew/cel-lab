@@ -672,3 +672,30 @@ open a new PR.
 
 - **Result:** Committed the playback fixes on `fix/skip-while-playing`, pushed them and opened a
   pull request into `main`.
+
+### 2026-11-06 00:54 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+the PR was merged. now, regarding the UI, it looks rather unrefined. can we improve it visually?
+````
+
+- **Result:** Visual refinement on `feature/ui-polish` (frontend-design skill, reviewed in browser
+  screenshots): compact header with a glider mark, hairline-separated steps, white fields, the world
+  on a white stage with name and generation, playback row with a segmented delay, legend + counts
+  in one line, Altair chart without duplicate legend, fainter cell lines. Tests adapted (261 pass);
+  DESIGN.md palette and GUI notes updated. Uncommitted, waiting for review.
+
+### 2026-11-06 01:18 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+nice. open a new PR.
+````
+
+- **Result:** Committed the visual refinement on `feature/ui-polish`, pushed it and opened a pull
+  request into `main`.

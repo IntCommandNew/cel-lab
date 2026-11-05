@@ -2,6 +2,7 @@
 
 import json
 import logging
+import re
 from pathlib import Path
 
 import pytest
@@ -55,7 +56,7 @@ def test_starts_with_game_of_life(app):
 
 
 def test_steps_are_shown_in_order(app):
-    headings = [h.value for h in app.get("html") if h.value.startswith('<h3 class="cl-step"')]
+    headings = [h.value for h in app.get("html") if h.value.startswith('<h3 class="cl-step')]
     for number, title, heading in zip(
         (1, 2, 3), ("Automaton", "Initial world", "Run"), headings, strict=True
     ):
@@ -284,9 +285,11 @@ def run_button(at):
 
 
 def headline(at):
-    return next(
-        m.value for m in at.markdown if m.value.startswith("**") and "generation" in m.value
-    )
+    """The stage header, as "**Name**: generation g of n." (the format the tests compare with)."""
+    head = next(h.value for h in at.get("html") if "cl-stage-head" in h.value)
+    name = re.search(r'cl-name">([^<]*)<', head).group(1).replace("&#x27;", "'")
+    status = re.search(r'cl-gen">([^<]*)<', head).group(1)
+    return f"**{name}**: {status[0].lower()}{status[1:]}."
 
 
 NOISY = {
@@ -303,7 +306,7 @@ NOISY = {
 
 def test_world_tab_previews_the_initial_world(app):
     assert app.tabs[0].label == "World"
-    assert "**Game of Life**: initial world, not run yet." in texts(app)
+    assert headline(app) == "**Game of Life**: initial world, not run yet."
     assert app.session_state["run"] is None if "run" in app.session_state else True
 
 
@@ -315,7 +318,7 @@ def test_run_and_browse_generations(app):
     assert headline(app) == "**Game of Life**: generation 50 of 50."
     app.select_slider(key="run_view").set_value(10).run()
     assert headline(app) == "**Game of Life**: generation 10 of 50."
-    assert "Cells per state at generation 10: dead" in texts(app)
+    assert "Cells: " in texts(app) and "dead<b>" in texts(app)
 
 
 def test_continue_extends_the_run(app):
@@ -367,7 +370,7 @@ def test_random_rules_ask_for_a_seed_and_show_only_stored_generations(app):
 def test_changing_the_automaton_previews_its_world_and_keeps_the_run(app):
     run_button(app).click().run()
     app.selectbox(key="preset_id").set_value("brians-brain").run()
-    assert "**Brian's Brain**: initial world for the current settings" in texts(app)
+    assert headline(app) == "**Brian's Brain**: initial world for the current settings."
     assert not [b for b in app.button if b.label in ("Save run", "Continue for 50 generations")]
     app.selectbox(key="preset_id").set_value("game-of-life").run()
     assert headline(app) == "**Game of Life**: generation 50 of 50."
@@ -376,7 +379,7 @@ def test_changing_the_automaton_previews_its_world_and_keeps_the_run(app):
 def test_changing_the_world_settings_shows_the_new_initial_world(app):
     run_button(app).click().run()
     app.number_input(key="w_seed").set_value(7).run()
-    assert "initial world for the current settings" in texts(app)
+    assert "initial world for the current settings" in headline(app)
     app.number_input(key="w_seed").set_value(1).run()  # back to the settings of the run
     assert headline(app) == "**Game of Life**: generation 50 of 50."
 
@@ -401,14 +404,14 @@ def test_play_pause_resume_and_skip(app):
     by_key(app, "play_pause").click().run()
     assert app.session_state["play_state"] == "playing"
     assert by_key(app, "play_pause").label == "Pause"
-    assert app.select_slider(key="play_delay").disabled  # speed fixed while playing
+    assert group(app, "play_delay").disabled  # speed fixed while playing
     # while playing the slider is replaced by a progress bar (see _player)
     assert not [s for s in app.select_slider if s.key == "run_view"]
     by_key(app, "play_pause").click().run()
     assert app.session_state["play_state"] == "paused"
     assert by_key(app, "play_pause").label == "Resume"
-    assert not app.select_slider(key="play_delay").disabled  # editable while paused
-    app.select_slider(key="play_delay").set_value(0.5).run()
+    assert not group(app, "play_delay").disabled  # editable while paused
+    group(app, "play_delay").set_value(0.5).run()
     by_key(app, "skip_end").click().run()
     assert headline(app) == "**Game of Life**: generation 50 of 50."
     assert app.session_state["play_state"] == "stopped"

@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 import os
 
+import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -216,6 +217,62 @@ def run_section(automaton: Automaton, world: np.ndarray | None, setting: dict) -
 # --- World tab ------------------------------------------------------------------------------
 
 
+def _stage_head(name: str, status: str) -> None:
+    st.html(
+        f'<div class="cl-stage-head"><span class="cl-name">{html.escape(name)}</span>'
+        f'<span class="cl-gen">{html.escape(status)}</span></div>'
+    )
+
+
+def _counts_line(automaton: Automaton, counts) -> None:
+    """Legend and counts in one line: swatch (the real cell colour), state, number of cells."""
+    parts = "".join(
+        f"{swatch(s.color)}{html.escape(s.name)}<b>{int(n)}</b>"
+        for s, n in zip(automaton.states, counts, strict=True)
+    )
+    st.html(f'<div class="cl-counts">Cells: {parts}</div>')
+
+
+def _population_chart(run) -> None:
+    """Cells per generation for the non-default states (the default is the large remainder)."""
+    a = run.automaton
+    table = run.population_table()
+    shown = [i for i, s in enumerate(a.states) if s.name != a.default_state] or [0]
+    names = [a.states[i].name for i in shown]
+    colors = [chart_colors(a)[i] for i in shown]
+    data = pd.DataFrame(table[:, shown], columns=names)
+    data["Generation"] = range(len(data))
+    long = data.melt("Generation", var_name="State", value_name="Cells")
+    font = "Atkinson Hyperlegible Next, sans-serif"
+    chart = (
+        alt.Chart(long)
+        .mark_line(strokeWidth=1.75)
+        .encode(
+            x=alt.X("Generation:Q", axis=alt.Axis(tickMinStep=1, tickCount=10, grid=False)),
+            y=alt.Y("Cells:Q", axis=alt.Axis(gridColor="#E6E9F0", tickCount=4)),
+            color=alt.Color("State:N", scale=alt.Scale(domain=names, range=colors), legend=None),
+            tooltip=["Generation:Q", "State:N", "Cells:Q"],
+        )
+        .properties(height=170)
+        .configure_axis(
+            labelFont=font,
+            titleFont=font,
+            labelColor="#5C6178",
+            titleColor="#5C6178",
+            domainColor="#D5DAE3",
+            tickColor="#D5DAE3",
+            titleFontWeight="normal",
+        )
+        .configure_view(strokeWidth=0)
+    )
+    st.altair_chart(
+        chart,
+        width="stretch",
+        theme=None,
+        alt=f"Number of cells in each state over {run.last_generation} generations",
+    )
+
+
 def _show_grid(automaton: Automaton, grid: np.ndarray, alt: str) -> None:
     image = render(automaton, grid)
     height, width = image.shape[:2]
@@ -290,7 +347,7 @@ def _player() -> None:
     g = ss.view_gen
     last = run.last_generation
 
-    st.markdown(f"**{a.name}**: generation {g} of {last}.")
+    _stage_head(a.name, f"Generation {g} of {last}")
     if a.is_elementary:
         _show_grid(a, space_time(run, g), alt=f"{a.name}, generations 0 to {g}, time downwards")
         st.caption("Each row is one generation; time runs downwards.")
@@ -346,18 +403,19 @@ def _player() -> None:
             ):
                 _skip_to_end()
                 st.rerun()
-            st.select_slider(
-                "Delay between generations",
+            st.space("stretch")
+            st.segmented_control(
+                "Delay",
                 PLAY_DELAYS,
                 format_func=lambda d: f"{d:g} s",
+                required=True,
                 disabled=playing,
-                help="Change it before playing or while paused.",
+                help="Time between generations while playing. Change it before playing or "
+                "while paused.",
                 **keep("play_delay", DEFAULT_PLAY_DELAY),
             )
 
-    table = run.population_table()
-    counts = ", ".join(f"{name} {int(n)}" for name, n in zip(a.state_names, table[g], strict=True))
-    st.caption(f"Cells per state at generation {g}: {counts}.")
+    _counts_line(a, run.population_table()[g])
 
 
 def world_tab(
@@ -370,14 +428,18 @@ def world_tab(
         if automaton is None or preview is None:
             st.markdown("The world appears here once the automaton and initial world are valid.")
             return
-        if ss.get("run") is None:
-            st.markdown(f"**{automaton.name}**: initial world, not run yet.")
-        else:
-            st.markdown(
-                f"**{automaton.name}**: initial world for the current settings. Run to simulate "
-                "it; the previous run comes back if you return to its settings."
+        with st.container(key="stage"):
+            if ss.get("run") is None:
+                _stage_head(automaton.name, "Initial world, not run yet")
+            else:
+                _stage_head(automaton.name, "Initial world for the current settings")
+            _show_grid(automaton, preview, alt=f"Initial world of {automaton.name}")
+            _counts_line(automaton, np.bincount(preview.ravel(), minlength=len(automaton.states)))
+        if ss.get("run") is not None:
+            st.caption(
+                "Run to simulate this world. The previous run comes back if you return to its "
+                "settings."
             )
-        _show_grid(automaton, preview, alt=f"Initial world of {automaton.name}")
         return
 
     run = ss.run
@@ -388,26 +450,9 @@ def world_tab(
             "simulate the current one."
         )
     delay = ss.get("_saved_play_delay", DEFAULT_PLAY_DELAY)
-    st.fragment(_player, run_every=delay if ss.play_state == "playing" else None)()
-
-    table = run.population_table()
-    shown = [i for i, s in enumerate(a.states) if s.name != a.default_state] or [0]
-    colors = chart_colors(a)
-    st.html(
-        '<div class="cl-legend">Cells per generation: '
-        + " ".join(f"{swatch(colors[i])}{html.escape(a.states[i].name)}" for i in shown)
-        + "</div>"
-    )
-    chart = pd.DataFrame(table[:, shown], columns=[a.states[i].name for i in shown])
-    chart.index.name = "Generation"
-    st.line_chart(
-        chart,
-        color=[colors[i] for i in shown],
-        x_label="Generation",
-        y_label="Cells",
-        height=220,
-        alt=f"Number of cells in each state over {run.last_generation} generations",
-    )
+    with st.container(key="stage"):
+        st.fragment(_player, run_every=delay if ss.play_state == "playing" else None)()
+    _population_chart(run)
     if not run.is_deterministic and run.settings.history != "all":
         st.caption("This automaton has random rules, so only the stored generations can be shown.")
 

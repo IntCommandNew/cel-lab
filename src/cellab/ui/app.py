@@ -24,7 +24,13 @@ from cellab.ui.build_form import (
     load_form,
 )
 from cellab.ui.builder import definition_from_form, form_from_definition
-from cellab.ui.components import inject_css, render_issues, render_summary, step_heading
+from cellab.ui.components import (
+    inject_css,
+    page_header,
+    render_issues,
+    render_summary,
+    step_heading,
+)
 from cellab.ui.run_panel import run_section, saved_runs_tab, world_section, world_tab
 
 SOURCES = {"preset": "Known automata", "build": "Build", "json": "JSON"}
@@ -241,8 +247,7 @@ def main() -> None:
     st.set_page_config(page_title="CelLab", layout="wide")
     inject_css()
     init_state()
-    st.title("CelLab", anchor=False)
-    st.caption("Choose or write a cellular automaton, check it, then run it.")
+    page_header()
 
     # building needs room for the tables; otherwise the result gets the wider column
     ratio = [3, 2] if st.session_state.source == "build" else [2, 3]
