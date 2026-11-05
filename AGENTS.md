@@ -116,5 +116,10 @@ emojis) is a non-keyboard character.
 - Every engine/analysis/parser feature gets pytest tests
   (known automata: Life, Brian's Brain, Rule 30...).
 - Code, comments, docs and commit messages in English.
-- Branches: `feature/<short-name>`, `fix/<short-name>`; PRs into `main`.
+- Branches: `feature/<short-name>`, `fix/<short-name>`, `docs/<short-name>`; PRs into `main`.
   Don't commit/push unless asked.
+- `main` is protected on GitHub (ruleset "Protect main"): changes only through pull requests,
+  no force pushes, no deletion; review conversations must be resolved before merging. Merged
+  branches are deleted automatically. Never try to push to `main` directly: create a branch first.
+- `PROMPTS.md` updates are committed on the current working branch together with the work they
+  describe; if there is no working branch yet, they wait uncommitted until there is one.

@@ -169,3 +169,31 @@ open the pull request
 - **Result:** Opened pull request #1 (`feature/project-setup` -> `main`):
   <https://github.com/IntCommandNew/cel-lab/pull/1>, with a summary of the setup, the steps each
   team member does after merging, and the checks that pass.
+
+### 2026-11-05 18:33 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+I merged the pull request. before we continue, can you setup the GitHub repository a bit with some important rules like no force commit to main and branch deletion after merging?
+````
+
+- **Result:** Configured the GitHub repository: ruleset "Protect main" (pull request required,
+  0 approvals, review threads resolved; force pushes and deletion blocked; no bypass) and automatic
+  deletion of merged branches (plus "update branch" button). Deleted the merged branch, synced local
+  `main`. Documented the workflow in README ("Contributing workflow") and AGENTS.md; these edits
+  and this entry are uncommitted until the next working branch, since `main` now only takes PRs.
+
+### 2026-11-05 18:40 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+leave the requirement at 0 and put these changes in a PR.
+````
+
+- **Result:** Kept the required approvals at 0. Committed the pending documentation changes
+  (README "Contributing workflow", AGENTS.md repository rules) and the latest PROMPTS.md entries on
+  branch `docs/repo-rules`, pushed it and opened a pull request into `main`.

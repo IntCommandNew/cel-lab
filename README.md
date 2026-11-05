@@ -171,6 +171,21 @@ hook changes.
 - Inline code *completions* (grey ghost text) are not prompts and are not logged one by one; their
   use is covered by the general statement in [Use of AI tools](#use-of-ai-tools).
 
+## Contributing workflow
+
+`main` is protected: every change goes through a pull request, force pushes and deleting `main`
+are blocked, and open review conversations must be resolved before merging.
+
+```bash
+git checkout main && git pull                # start from the latest main
+git checkout -b feature/<short-name>         # or fix/... , docs/...
+# ... work, commit (including the PROMPTS.md entries for your prompts) ...
+git push -u origin feature/<short-name>      # then open a pull request into main on GitHub
+```
+
+After merging, GitHub deletes the branch automatically; locally run `git checkout main`,
+`git pull` and `git branch -d feature/<short-name>`.
+
 ## Documentation
 
 - [docs/SPECIFICATION.md](docs/SPECIFICATION.md) - summary of the course requirements
