@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Generated data (runs, datasets, trained models) - keep the folder only
+data/*
+!data/.gitkeep
+*.pt
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Environment
+.env
+.env.*
+
+# Claude Code - personal files (shared config lives in .claude/settings.json)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Editors / OS
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

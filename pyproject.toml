@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cellab"
+version = "0.1.0"
+description = "Cellular automata laboratory: describe automata in natural language, simulate and analyse them."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [
+    { name = "Georgic\u0103 D\u0103nu\u021B-Liviu" },
+    { name = "Ghica Alexandra-Mihaela" },
+    { name = "Iacob David-Gabriel" },
+    { name = "Zavincu Sergiu-Constantin" },
+]
+dependencies = [
+    "numpy>=2.0",
+    "streamlit>=1.40",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.8",
+]
+# Deliverable 3 only (experiments/). Never imported by src/cellab.
+ml = [
+    "torch>=2.5",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cellab"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "experiments"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]

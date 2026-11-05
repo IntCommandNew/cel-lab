@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "davidanson.vscode-markdownlint",
+    "anthropic.claude-code",
+    "github.copilot",
+    "github.copilot-chat",
+    "tamasfe.even-better-toml"
+  ]
+}

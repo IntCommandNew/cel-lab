@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "python tools/prompt_log.py prompt --assistant copilot",
+        "bash": "python3 tools/prompt_log.py prompt --assistant copilot || python tools/prompt_log.py prompt --assistant copilot",
+        "powershell": "python tools/prompt_log.py prompt --assistant copilot",
+        "cwd": ".",
+        "timeoutSec": 15
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python tools/prompt_log.py stop --assistant copilot",
+        "bash": "python3 tools/prompt_log.py stop --assistant copilot || python tools/prompt_log.py stop --assistant copilot",
+        "powershell": "python tools/prompt_log.py stop --assistant copilot",
+        "cwd": ".",
+        "timeoutSec": 15
+      }
+    ]
+  }
+}
