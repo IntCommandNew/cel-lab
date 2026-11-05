@@ -283,6 +283,17 @@ Choose or write a cellular automaton, check it, then run it.
   which is where Rule 30's triangle appears. A generation slider sits under the grid like a
   scrubber; for random automata only stored generations can be shown, and the GUI says so. A
   line chart shows the non-default states over time, with a swatch legend in the state colours.
+- **Playback**: *Play* / *Pause* / *Resume* and *Skip to the end* under the grid; the delay
+  between generations (0.1 to 2 s) can be changed before playing or while paused, not while
+  playing. Only the viewer reruns on each tick (`st.fragment` with `run_every`). Arrow buttons on
+  both sides of the generation slider step one generation back or forward; slider and arrows are
+  disabled while playing.
+- **Run vs preview**: a run is shown only for the automaton and world settings it was made with.
+  Changing either shows the new initial world instead (so the effect of a setting is visible
+  immediately), and *Continue* / *Save run* are hidden; returning to the run's settings shows the
+  run again.
+- **Tabs follow the action**: *Run*, *Continue* and *Open run* switch the right column to
+  the *World* tab, so the result is always in view.
 - Every source of a definition (known automaton, form, JSON, later natural language) produces the
   same JSON and goes through the same validator. Errors and warnings name the field and say how to
   fix it; warnings never block.

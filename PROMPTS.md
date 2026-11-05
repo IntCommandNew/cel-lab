@@ -587,3 +587,43 @@ open a new PR.
 
 - **Result:** Committed chunk 6 (initial world, run, viewer, saved runs, tests, docs) on
   `feature/sprint2-gui-run`, pushed it and opened a pull request into `main`.
+
+### 2026-11-05 23:33 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+the PR was merged. what I want to do now is to work a bit on the experience of the application. we need a play mode with animation (basically, jut a delay between generations  with a pause and resume button and a skip button to go directly to the end). the speed between generations must be editable before we start the animation or when it is paused, but not when it is running. the slider between generations at the end must have 2 arrow buttons so we can move left or right with more ease. also, after I have made a run, the worls remains set and I can't visually see how the worls is beeing built when I tweek some settings like it does before the first run.
+````
+
+- **Result:** On `feature/gui-playback`: playback in the World tab (Play / Pause / Resume, Skip to
+  the end, delay 0.1-2 s editable only when not playing; only the viewer reruns via `st.fragment`),
+  arrow buttons around the generation slider, and live preview: after changing the automaton or
+  world settings the new initial world is shown (Continue/Save hidden) until a new run. 256 tests,
+  playback timing checked in a real browser. DESIGN/PLANNING updated (chunk 6 ticked). Uncommitted.
+
+### 2026-11-05 23:53 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+looks nice. what I also want is that, after I load a save, to be put directly in the world section.
+````
+
+- **Result:** Opening a saved run now switches to the World tab (keyed `st.tabs`, set from the
+  callback); Run and Continue do the same for consistency. 2 new GUI tests (258 total), checked in
+  a real browser, no warnings. DESIGN.md updated. Uncommitted on `feature/gui-playback`.
+
+### 2026-11-06 00:00 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+open a new PR.
+````
+
+- **Result:** Committed the playback and viewer improvements on `feature/gui-playback`, pushed
+  them and opened a pull request into `main`.
