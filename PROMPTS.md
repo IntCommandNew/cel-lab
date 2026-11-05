@@ -197,3 +197,32 @@ leave the requirement at 0 and put these changes in a PR.
 - **Result:** Kept the required approvals at 0. Committed the pending documentation changes
   (README "Contributing workflow", AGENTS.md repository rules) and the latest PROMPTS.md entries on
   branch `docs/repo-rules`, pushed it and opened a pull request into `main`.
+
+### 2026-11-05 18:47 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+before we get to the implementation, I would like to talk a bit about some claude skills. I heard about an official claude skill used to design frontend and UI/UX. can we get that skill in our project?
+````
+
+- **Result:** Added Anthropic's official `frontend-design` skill (anthropics/skills, commit
+  `41bbe19`, Apache-2.0) to `.claude/skills/frontend-design/`, unmodified with its LICENSE.txt;
+  Claude Code and VS Code Copilot both load it from there. Exempted verbatim third-party files from
+  the character checker and markdownlint (`.markdownlint-cli2.jsonc`), documented skills and
+  third-party files in AGENTS.md and README. Uncommitted, on local branch
+  `feature/frontend-design-skill`. Noted the skill targets HTML/React; we apply it via Streamlit.
+
+### 2026-11-05 18:54 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+since they are third-party files, it is only natural to make an exception for them and not modify their format or content to fit our rules. you can open the PR.
+````
+
+- **Result:** Confirmed the exception for third-party files (kept unmodified). Committed the
+  `frontend-design` skill, the exemptions and the documentation on `feature/frontend-design-skill`,
+  pushed it and opened a pull request into `main`.

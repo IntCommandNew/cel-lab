@@ -21,6 +21,9 @@ CHECKED_SUFFIXES = {
     ".js", ".ts", ".css", ".html", ".sh", ".ps1", ".bat",
 }  # fmt: skip
 CHECKED_NAMES = {".gitignore", ".gitattributes", ".editorconfig"}
+# Third-party files copied verbatim (see "Third-party files" in AGENTS.md): kept unmodified for
+# their license and for clean updates, so the character rules do not apply to them.
+THIRD_PARTY_DIRS = (".claude/skills/frontend-design/",)
 FENCE = re.compile(r"^\s*(`{3,}|~{3,})")
 
 
@@ -54,6 +57,8 @@ def exempt_lines(lines: list[str]) -> set[int]:
 
 def check(path: Path) -> list[str]:
     if path.suffix not in CHECKED_SUFFIXES and path.name not in CHECKED_NAMES:
+        return []
+    if path.as_posix().startswith(THIRD_PARTY_DIRS):
         return []
     try:
         lines = path.read_text(encoding="utf-8").split("\n")
