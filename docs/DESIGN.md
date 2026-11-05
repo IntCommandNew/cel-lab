@@ -139,13 +139,22 @@ user).
 
 ## 6. Simulation & history
 
-- The engine computes per-state neighbour-count arrays with `np.roll` (wrap) or padding (fixed
-  boundary), then applies rule masks in order. A new generation never reads cells already updated in
-  the same step.
-- **Generations computed != generations stored.** History modes: `all`, `every k` (checkpoints),
-  `final`.
-- Every generation's hash (`blake2b` of the grid bytes) is recorded regardless of history mode, so
-  stability and cycle detection work even when intermediate states are not kept.
+Implemented in `cellab.engine` (`neighbors.py`, `step.py`, `simulate.py`).
+
+- The grid is padded once for the boundary (`wrap` copies the opposite edge, `fixed` adds cells of
+  the fixed state); each neighbour offset is a slice of the padded array, and per-state counts are
+  computed only for the states the rules use. Rule masks are applied in order. A new generation
+  never reads cells already updated in the same step.
+- **Generations computed != generations stored.** History modes: `all`, `every` k-th
+  (checkpoints), `final`. Generation 0 (the initial world) and the latest generation are always
+  stored. Storing more than about 512 MB of grids is refused with advice to keep fewer.
+- For **every** generation, whatever the history mode, the run records a hash (`blake2b` of the
+  grid bytes) and the number of cells in each state, so stability / cycle detection and population
+  charts work even when intermediate grids are not kept.
+- A generation that was not stored is **recomputed** from the nearest earlier stored one for
+  deterministic automata; for automata with random rules it cannot be recovered (the GUI says so).
+- A run can be **continued** (`Run.advance`): the latest grid and the random generator state are
+  part of the run, so continuing gives exactly the same result as an uninterrupted run.
 
 ## 7. Analysis questions - we support all five
 
@@ -163,15 +172,21 @@ seeded run").
 
 ## 8. Storage & recovery
 
+Implemented in `cellab.storage` (`runs.py`). One folder per run:
+
 ```text
-data/runs/2026-11-06_1530_game-of-life/
+data/runs/2026-11-06_093012_game-of-life/
 |-- definition.json     validated automaton definition
-|-- experiment.json     grid source, seed, generations, history mode, timings, analysis answers
-`-- history.npz         stored generations (uint8) + generation indices + hashes
+|-- experiment.json     history settings, seed, initial-world source, last generation, timings,
+|                       random generator state, format version
+`-- history.npz         stored generations (uint8) + their indices, latest grid, hashes and
+                        per-state populations of every generation (compressed)
 ```
 
-A run can be reloaded to browse it, re-run analyses, or **resume** simulation from its last stored
-state. Example definitions and NL descriptions are versioned in `examples/automata/`.
+A run can be reloaded to browse it, recompute missing generations, re-run analyses, or **resume**
+the simulation exactly where it stopped. Damaged or incomplete folders give a clear error and are
+skipped in run listings. As an indication, 1001 generations of a 40 x 30 Game of Life take about
+35 KB. Analysis answers will be added to `experiment.json` in Sprint 3.
 
 ## 9. Natural-language parser (Deliverable 4, draft)
 

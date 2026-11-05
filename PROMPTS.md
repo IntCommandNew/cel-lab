@@ -326,3 +326,30 @@ open a PR
 
 - **Result:** Committed chunk 2 (engine, world generation, tests, DESIGN/PLANNING updates) on
   `feature/sprint2-engine`, pushed it and opened a pull request into `main`.
+
+### 2026-11-05 19:52 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+the PR was merged.
+````
+
+- **Result:** Synced `main`, built chunk 3 on `feature/sprint2-storage`: `cellab.engine.simulate`
+  (Run with history all / every k / final, per-generation hashes and populations, recompute of
+  unstored generations, exact resume incl. random state) and `cellab.storage` (run folders: save,
+  load, list, clear errors for damaged runs). 178 tests pass, incl. save -> load -> resume equal to
+  an uninterrupted run. DESIGN.md sections 6/8 updated, chunk 2 ticked. Uncommitted, for review.
+
+### 2026-11-05 19:59 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+open a PR
+````
+
+- **Result:** Committed chunk 3 (simulation, run storage, tests, DESIGN/PLANNING updates) on
+  `feature/sprint2-storage`, pushed it and opened a pull request into `main`.
