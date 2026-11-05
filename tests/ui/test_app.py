@@ -402,7 +402,8 @@ def test_play_pause_resume_and_skip(app):
     assert app.session_state["play_state"] == "playing"
     assert by_key(app, "play_pause").label == "Pause"
     assert app.select_slider(key="play_delay").disabled  # speed fixed while playing
-    assert app.select_slider(key="run_view").disabled
+    # while playing the slider is replaced by a progress bar (see _player)
+    assert not [s for s in app.select_slider if s.key == "run_view"]
     by_key(app, "play_pause").click().run()
     assert app.session_state["play_state"] == "paused"
     assert by_key(app, "play_pause").label == "Resume"
@@ -450,3 +451,16 @@ def test_running_from_another_tab_shows_the_world_tab(app):
     app.run()
     run_button(app).click().run()
     assert app.session_state["result_tab"] == "World"
+
+
+def test_skip_while_playing_goes_to_the_end(app):
+    """Regression: Skip during playback used to stop at the current generation (in the browser
+    the old slider position was sent back with the click). While playing there is no slider."""
+    run_button(app).click().run()
+    app.select_slider(key="run_view").set_value(5).run()
+    by_key(app, "play_pause").click().run()
+    assert app.session_state["play_state"] == "playing"
+    by_key(app, "skip_end").click().run()
+    assert headline(app) == "**Game of Life**: generation 50 of 50."
+    assert app.select_slider(key="run_view").value == 50
+    assert by_key(app, "skip_end").disabled

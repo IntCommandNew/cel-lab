@@ -115,3 +115,24 @@ def test_neighbour_view_stays_in_range():
     assert neighbour_view([0, 1, 2], 0, -1) == 0
     assert neighbour_view([0, 1, 2], 2, +1) == 2
     assert neighbour_view([0, 10, 20], 10, +1) == 20
+
+
+def test_png_data_uri_round_trips():
+    import base64
+    import io
+
+    from PIL import Image
+
+    from cellab.ui.run_logic import png_data_uri
+
+    image = render(preset("game-of-life"), np.eye(4, dtype=np.uint8), cell=10)
+    uri = png_data_uri(image)
+    assert uri.startswith("data:image/png;base64,")
+    decoded = np.array(Image.open(io.BytesIO(base64.b64decode(uri.split(",", 1)[1]))))
+    np.testing.assert_array_equal(decoded, image)
+
+
+def test_fastest_playback_is_0_2_seconds():
+    from cellab.ui.run_logic import DEFAULT_PLAY_DELAY, PLAY_DELAYS
+
+    assert min(PLAY_DELAYS) == 0.2 and DEFAULT_PLAY_DELAY in PLAY_DELAYS

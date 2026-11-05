@@ -279,15 +279,17 @@ Choose or write a cellular automaton, check it, then run it.
   for automata with random rules; *Run*, *Continue* (extends the same run) and *Save run* (to
   `data/runs/`, or `CELLAB_RUNS_DIR`). Saved runs are reopened from the *Saved runs* tab.
 - **Viewer**: the grid drawn as an image with exact state colours (pixel-perfect scaling, no
-  blur); 1D automata are shown as a space-time picture (one row per generation, time downwards),
-  which is where Rule 30's triangle appears. A generation slider sits under the grid like a
+  blur), embedded in the page as an inline PNG so a fast playback never shows a missing image.
+  1D automata are shown as a space-time picture (one row per generation, time downwards), which
+  is where Rule 30's triangle appears. A generation slider sits under the grid like a
   scrubber; for random automata only stored generations can be shown, and the GUI says so. A
   line chart shows the non-default states over time, with a swatch legend in the state colours.
-- **Playback**: *Play* / *Pause* / *Resume* and *Skip to the end* under the grid; the delay
-  between generations (0.1 to 2 s) can be changed before playing or while paused, not while
+- **Playback**: *Play* / *Pause* / *Resume* and *Skip to the end* under the grid; the delay between
+  generations (0.2 to 2 s, default 0.3 s) can be changed before playing or while paused, not while
   playing. Only the viewer reruns on each tick (`st.fragment` with `run_every`). Arrow buttons on
-  both sides of the generation slider step one generation back or forward; slider and arrows are
-  disabled while playing.
+  both sides of the generation slider step one generation back or forward. While playing, the arrows
+  are disabled and the slider is replaced by a progress bar: a slider changed by the server on every
+  tick would send its older position back with the next click (e.g. *Skip*).
 - **Run vs preview**: a run is shown only for the automaton and world settings it was made with.
   Changing either shows the new initial world instead (so the effect of a setting is visible
   immediately), and *Continue* / *Save run* are hidden; returning to the run's settings shows the

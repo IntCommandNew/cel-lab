@@ -27,6 +27,7 @@ CSS = """
 .cl-facts { margin-left: 0 !important; padding-left: 0 !important; }
 textarea[aria-label="Definition (JSON)"] {
   font-family: "Atkinson Hyperlegible Mono", monospace; font-size: 0.85rem; }
+img.cl-grid { display: block; max-width: 100%; height: auto; image-rendering: pixelated; }
 .cl-legend { color: #5C6178; font-size: 0.875rem; }
 .cl-legend .cl-swatch { margin-left: 0.6em; }
 .cl-symbol { font-family: "Atkinson Hyperlegible Mono", monospace; color: #5C6178;
