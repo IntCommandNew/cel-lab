@@ -148,6 +148,7 @@ The repository ships the same context and prompt logging for both assistants we 
 | Project context | `CLAUDE.md` -> imports `AGENTS.md` | `AGENTS.md` + `.github/copilot-instructions.md` |
 | Settings | `.claude/settings.json` | `.vscode/settings.json` (Copilot section) |
 | Prompt-logging hooks | `.claude/settings.json` | `.github/hooks/prompt-log.json` |
+| Skills (e.g. `frontend-design`) | `.claude/skills/` | `.claude/skills/` (read by VS Code) |
 
 Both hook configurations run the same script, `tools/prompt_log.py`, which appends every prompt to
 `PROMPTS.md` and reminds the assistant to fill in the result. `AGENTS.md` is the single source of

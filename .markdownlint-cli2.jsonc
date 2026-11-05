@@ -1,0 +1,9 @@
+// markdownlint-cli2 / VS Code markdownlint: files to skip. Rules live in .markdownlint.jsonc.
+{
+  "ignores": [
+    ".venv/**",
+    "node_modules/**",
+    // Third-party files copied verbatim (see "Third-party files" in AGENTS.md).
+    ".claude/skills/frontend-design/**"
+  ]
+}

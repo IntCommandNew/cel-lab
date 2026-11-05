@@ -101,8 +101,29 @@ emojis) is a non-keyboard character.
 - **Emojis**: same rules, but even more sparingly; in practice almost never. Prefer words
   ("Yes", "done", "out of scope").
 - **Exception:** the verbatim prompts and pasted texts inside the fenced blocks of `PROMPTS.md` are
-  a record and are never altered.
+  a record and are never altered. Third-party files copied verbatim are exempt too (see below).
 - Check before committing: `python tools/check_chars.py` (lists violations with the code to use).
+
+## Assistant skills
+
+Shared skills live in `.claude/skills/<name>/SKILL.md`. Claude Code and VS Code Copilot both load
+them from there; they are used automatically when relevant or invoked with `/<name>`.
+
+| Skill | Use it for | Source |
+| --- | --- | --- |
+| `frontend-design` | Visual/UX design of the Streamlit GUI: palette, typography, layout, interface wording, grid colours | [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills/frontend-design) at commit `41bbe19`, Apache-2.0 |
+
+The skill targets HTML/CSS/React pages. In this project apply its guidance through Streamlit's
+means: the theme in `.streamlit/config.toml`, layout primitives (columns, tabs, containers), and
+custom CSS only where the theme is not enough.
+
+## Third-party files
+
+Files copied verbatim from other projects (currently `.claude/skills/frontend-design/`) are kept
+**unmodified**, with their license file next to them, so they can be updated cleanly. They are
+exempt from the character rules and markdownlint (`THIRD_PARTY_DIRS` in `tools/check_chars.py`,
+`ignores` in `.markdownlint-cli2.jsonc`). To update one, copy the new upstream version over it and
+change the commit in the table above. Add new third-party files to both exemption lists.
 
 ## Conventions
 
