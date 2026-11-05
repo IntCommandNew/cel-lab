@@ -258,15 +258,31 @@ distinct digits, which matters for counts read from the back of a room.
 CelLab
 Choose or write a cellular automaton, check it, then run it.
 
-1 Automaton                          [ Definition | JSON ]   (later: World first)
-  [Known automata | Build | JSON]     name, description
-  preset picker / form / JSON editor  Grid, Neighbours, States (colour swatches)
-2 Initial world                       Rules, numbered: their order matters
-3 Run                                 (later: the grid as the large hero, generation slider)
+1 Automaton                          [ World | Definition | JSON | Saved runs ]
+  [Known automata | Build | JSON]     Game of Life: generation 12 of 50.
+  preset picker / form / JSON editor  +--------------------------------+
+2 Initial world                       |   THE GRID (hero, exact cells, |
+  [Random | Centre cell | Text]       |   hairlines when cells are big)|
+3 Run                                 +--------------------------------+
+  Generations, Keep (all/every k/     Generation  o------------------  (scrubber)
+  last), seed for random rules        Cells per state at generation 12: ...
+  [Run 50 generations] [Continue      Cells per generation: [] alive
+  for 50 generations] [Save run]      (line chart of the non-default states)
 ```
 
 - The left column holds the steps in order; they are a real sequence, so they are numbered (quiet
-  graticule numerals). The right column shows the result; later the grid becomes its hero.
+  graticule numerals). The right column shows the result, and the grid is its hero.
+- **Initial world**: *Random* (a share per non-default state, seed), *Centre cell* (default for 1D
+  automata) or *Text* (typed symbols, centred). Each automaton gets its own default world. The
+  World tab previews generation 0 before anything runs.
+- **Run**: generations (up to 10,000 in the GUI), which generations to keep, a seed shown only
+  for automata with random rules; *Run*, *Continue* (extends the same run) and *Save run* (to
+  `data/runs/`, or `CELLAB_RUNS_DIR`). Saved runs are reopened from the *Saved runs* tab.
+- **Viewer**: the grid drawn as an image with exact state colours (pixel-perfect scaling, no
+  blur); 1D automata are shown as a space-time picture (one row per generation, time downwards),
+  which is where Rule 30's triangle appears. A generation slider sits under the grid like a
+  scrubber; for random automata only stored generations can be shown, and the GUI says so. A
+  line chart shows the non-default states over time, with a swatch legend in the state colours.
 - Every source of a definition (known automaton, form, JSON, later natural language) produces the
   same JSON and goes through the same validator. Errors and warnings name the field and say how to
   fix it; warnings never block.

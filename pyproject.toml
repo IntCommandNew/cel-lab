@@ -36,6 +36,10 @@ packages = ["src/cellab"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+filterwarnings = [
+    # raised inside Streamlit's chart code with pandas 3.1, not by CelLab
+    "ignore:The inplace keyword in DataFrame.reset_index is deprecated",
+]
 
 [tool.ruff]
 line-length = 100
