@@ -1,0 +1,13 @@
+// Shared markdownlint settings (used by the VS Code markdownlint extension and markdownlint-cli2).
+// Check from the command line: npx markdownlint-cli2 "**/*.md" "#.venv" "#node_modules"
+{
+  "default": true,
+  // Same width as the Python code (ruff line-length = 100). Tables, code blocks and headings may
+  // be longer: wrapping them would break or obscure them.
+  "MD013": { "line_length": 100, "tables": false, "code_blocks": false, "headings": false },
+  // One emphasis / strong style everywhere.
+  "MD049": { "style": "asterisk" },
+  "MD050": { "style": "asterisk" },
+  // Ordered lists numbered 1. 2. 3.
+  "MD029": { "style": "ordered" }
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest:*)",
+      "Bash(pytest:*)",
+      "Bash(ruff:*)",
+      "Bash(python -m ruff:*)",
+      "Bash(python -m pip install:*)",
+      "Bash(pip install:*)",
+      "Bash(streamlit run:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/prompt_log.py\" prompt --assistant claude || python3 \"$CLAUDE_PROJECT_DIR/tools/prompt_log.py\" prompt --assistant claude",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/tools/prompt_log.py\" stop --assistant claude || python3 \"$CLAUDE_PROJECT_DIR/tools/prompt_log.py\" stop --assistant claude",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
