@@ -124,9 +124,9 @@ def _rules_editor(names: list[str]) -> list[dict]:
             "from": st.column_config.SelectboxColumn(
                 "Cell in state", options=["any", *names], default="any", width=115
             ),
-            "to": st.column_config.SelectboxColumn(
-                "Becomes", options=names, required=True, width=105
-            ),
+            # not required: Streamlit would hold a new row back until it is filled in, so the
+            # rule would silently not count; the form explains a missing value instead
+            "to": st.column_config.SelectboxColumn("Becomes", options=names, width=105),
             "comparison": st.column_config.SelectboxColumn(
                 "When it has", options=list(COMPARISONS), default="always", required=True, width=110
             ),
@@ -230,6 +230,10 @@ def builder_section() -> tuple[ValidationResult, dict]:
 
     data, form_issues = definition_from_form(ss.form)
     result = validate(data)
-    if form_issues:
-        return ValidationResult(None, form_issues + result.issues), data
+    # the form already explains these fields in its own words; drop the JSON-worded twin
+    explained = {i.path.removeprefix("form.") for i in form_issues}
+    rest = [i for i in result.issues if i.path not in explained]
+    if any(i.level == "error" for i in form_issues):
+        return ValidationResult(None, form_issues + rest), data
+    return ValidationResult(result.automaton, form_issues + rest), data  # warnings never block
     return result, data

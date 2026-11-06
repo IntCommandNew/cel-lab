@@ -1,0 +1,14 @@
+{
+  "name": "Crystal growth",
+  "description": "An empty cell crystallises when exactly one of its four orthogonal neighbours is crystal. Start from a single crystal in the centre (Initial world: Centre cell) to grow a branching, snowflake-like fractal.",
+  "grid": { "width": 63, "height": 63, "boundary": { "fixed": "empty" } },
+  "states": [
+    { "name": "empty", "symbol": ".", "color": "#F3F5F8" },
+    { "name": "crystal", "symbol": "#", "color": "#1F5FA6" }
+  ],
+  "default_state": "empty",
+  "neighborhood": { "type": "von_neumann", "radius": 1 },
+  "rules": [
+    { "from": "empty", "to": "crystal", "when": { "count": "crystal", "eq": 1 } }
+  ]
+}

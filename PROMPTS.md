@@ -699,3 +699,116 @@ nice. open a new PR.
 
 - **Result:** Committed the visual refinement on `feature/ui-polish`, pushed it and opened a pull
   request into `main`.
+
+### 2026-11-06 01:23 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+the PR was merged. now, I want you to do some extensive tetsing over the actual application in a browser. use what tools seem fit.
+````
+
+- **Result:** Browser test session (Playwright + Edge, 74 checks in 12 groups: start-up, presets,
+  JSON, form builder, world, viewer/playback, runs, random seeds, limits, phone width, a11y,
+  console). 71 pass. Found: Generations field over 10,000 keeps showing the typed value while 50 is
+  used; arrow buttons announced as "chevron_left/right"; raw ISO dates in Saved runs. Rules-table
+  dropdowns could not be automated (manual check). No code changed; scripts kept in scratchpad.
+
+### 2026-11-06 01:51 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+fix all the problems, but don't add the playwright tests.
+````
+
+- **Result:** Fixed the browser-test findings on `fix/e2e-findings`: Generations over 10,000 now
+  shows an explanation and disables Run/Continue (no silently replaced value); Previous/Next arrow
+  buttons with text labels (they had no accessible name); Saved runs dates as "6 Nov 2026, 01:32";
+  the rules table's Becomes column is no longer required, so a new rule counts at once and the
+  form says what is missing. Tests added (264 at that point).
+
+### 2026-11-06 01:57 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+continue
+````
+
+- **Result:** Re-verified the fixes in the browser: generations message, arrow names, dates and a
+  new rule row reaching the app all confirmed; two failing checks traced to the test script
+  (visible text vs accessible name, waiting for long runs).
+
+### 2026-11-06 02:01 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+continue
+````
+
+- **Result:** Full browser session after the fixes: 73 of 74 checks pass (the last is the
+  rules-table typing the automation cannot drive). Added a non-blocking warning when a rule fills
+  Number(s)/Neighbours in state but "When it has" is always; form warnings no longer block.
+  265 tests; DESIGN.md updated. Uncommitted on `fix/e2e-findings`.
+
+### 2026-11-06 02:23 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+it works. before we open a new PR, I have a question about the saved automata: do they get to GitHub and what is the current point of saving automata intermediate states?
+````
+
+- **Result:** Answered: saved runs go to `data/runs/`, which is git-ignored (only `data/.gitkeep`
+  is tracked), so they never reach GitHub. Explained why intermediate generations are stored
+  (Deliverable 2 storage/recovery, browsing and resuming, random runs cannot be recomputed, Sprint 3
+  analysis and the Deliverable 3 dataset). No code changed.
+
+### 2026-11-06 02:29 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+so, if I save only every other third generation, to get back all 50 generations, are they rocomputed from scratch or are the intermediate generations saved used in restoration?
+````
+
+- **Result:** Answered from the code (`Run.generation`) and a measurement: unstored generations
+  are recomputed from the nearest earlier stored one, not from scratch (every 3rd kept: at most 2
+  steps, e.g. generation 47 = 2 steps from 45); results are not cached; random automata cannot be
+  recomputed. No code changed.
+
+### 2026-11-06 02:38 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+you can now open a new PR. however, before that, give me 2 JSON files for 2 automata that are not already existing ones.
+````
+
+- **Result:** Superseded: the same request was sent again two minutes later with a screenshot and
+  the saved-message problem added (next entry), and was handled there.
+
+### 2026-11-06 02:40 (UTC+0200) - Iacob David-Gabriel
+
+- **Assistant:** Claude Code
+- **Prompt:**
+
+````text
+you can now open a new PR. however, before that, give me 2 JSON files for 2 automata that are not already existing ones. also, [Image #8], while the select saving was updated, the saved message still shows the old unformated date message. this must be fixed.
+````
+
+- **Pasted:** [Image #8] screenshot of the Run step after opening a saved run: the success message
+  reads "Opened 2026-11-06_022754_game-of-life." (the raw folder name with an unformatted date).
+- **Result:** Saved/Opened messages now use the same label as the Saved runs list ("Game of Life,
+  50 generations, 6 Nov 2026, 02:27"; shared `run_label`), with tests. Added two new automata in
+  `examples/automata/`: a 4-state cyclic automaton (spiral waves) and crystal growth (symmetric
+  fractal from a centre cell), validated and simulated. Committed on `fix/e2e-findings`, PR opened.

@@ -124,12 +124,13 @@ def test_form_problems_point_to_the_row(row, path, message):
     assert message in issues[0].message
 
 
-def test_missing_target_is_left_to_the_validator():
+def test_missing_target_is_explained_by_the_form():
     form = blank_form()
     form["rules"] = [rule_row(**{"from": "dead"})]
-    result, issues = build(form)
-    assert issues == []
-    assert "Rule 1 needs a target state" in result.errors[0].message
+    _, issues = definition_from_form(form)
+    assert [(i.path, i.message) for i in issues] == [
+        ("form.rules[0].to", "Rule 1: choose what the cell becomes.")
+    ]
 
 
 def test_empty_rows_are_ignored_including_pandas_nan():
@@ -231,3 +232,14 @@ def test_renames_reach_rules_default_and_boundary():
         ("rest", "firing", "firing"),
     ]
     assert form["rules"][1]["from"] == "dying"  # original untouched
+
+
+def test_values_ignored_by_always_are_pointed_out_without_blocking():
+    form = blank_form()
+    form["rules"] = [rule_row(to="alive", comparison="always", value="2", count="alive")]
+    data, issues = definition_from_form(form)
+    assert [(i.level, i.path) for i in issues] == [("warning", "form.rules[0].comparison")]
+    assert "Number(s) and Neighbours in state are ignored" in issues[0].message
+    assert validate(data).ok
+    form["rules"] = [rule_row(to="alive", comparison="always", count="alive")]
+    assert "Neighbours in state is ignored" in definition_from_form(form)[1][0].message
