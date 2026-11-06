@@ -114,3 +114,19 @@ def png_data_uri(image: np.ndarray) -> str:
     buffer = io.BytesIO()
     Image.fromarray(image).save(buffer, format="PNG", optimize=True)
     return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
+
+
+def friendly_date(iso: str) -> str:
+    """'2026-11-06T01:32:29' -> '6 Nov 2026, 01:32'; anything else is returned unchanged."""
+    import datetime as dt
+
+    try:
+        d = dt.datetime.fromisoformat(iso)
+    except (TypeError, ValueError):
+        return iso
+    return f"{d.day} {d:%b %Y, %H:%M}"
+
+
+def run_label(automaton: str, last_generation: int, created: str) -> str:
+    """How a saved run is named everywhere in the GUI (list, Saved and Opened messages)."""
+    return f"{automaton}, {generations_label(last_generation)}, {friendly_date(created)}"

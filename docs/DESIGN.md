@@ -276,7 +276,8 @@ Choose or write a cellular automaton, check it, then run it.
 - **Initial world**: *Random* (a share per non-default state, seed), *Centre cell* (default for 1D
   automata) or *Text* (typed symbols, centred). Each automaton gets its own default world. The
   World tab previews generation 0 before anything runs.
-- **Run**: generations (up to 10,000 in the GUI), which generations to keep, a seed shown only
+- **Run**: generations (up to 10,000 in the GUI; a larger number is explained and blocks *Run*
+  instead of being silently replaced), which generations to keep, a seed shown only
   for automata with random rules; *Run*, *Continue* (extends the same run) and *Save run* (to
   `data/runs/`, or `CELLAB_RUNS_DIR`). Saved runs are reopened from the *Saved runs* tab.
 - **Viewer**: the grid drawn as an image with exact state colours (pixel-perfect scaling, no
@@ -287,10 +288,11 @@ Choose or write a cellular automaton, check it, then run it.
   line chart shows the non-default states over time, with a swatch legend in the state colours.
 - **Playback**: *Play* / *Pause* / *Resume* and *Skip to the end* under the grid; the delay between
   generations (0.2 to 2 s, default 0.3 s) can be changed before playing or while paused, not while
-  playing. Only the viewer reruns on each tick (`st.fragment` with `run_every`). Arrow buttons on
-  both sides of the generation slider step one generation back or forward. While playing, the arrows
-  are disabled and the slider is replaced by a progress bar: a slider changed by the server on every
-  tick would send its older position back with the next click (e.g. *Skip*).
+  playing. Only the viewer reruns on each tick (`st.fragment` with `run_every`). *Previous* / *Next*
+  buttons (text labels, so screen readers can name them) on both sides of the generation slider step
+  one generation back or forward. While playing, the arrows are disabled and the slider is replaced
+  by a progress bar: a slider changed by the server on every tick would send its older position back
+  with the next click (e.g. *Skip*).
 - **Run vs preview**: a run is shown only for the automaton and world settings it was made with.
   Changing either shows the new initial world instead (so the effect of a setting is visible
   immediately), and *Continue* / *Save run* are hidden; returning to the run's settings shows the
@@ -305,7 +307,9 @@ Choose or write a cellular automaton, check it, then run it.
   state* / *becomes* / *when it has* (always, exactly, at least, one of, between, ...) /
   *number(s)* / *neighbours in state* / *probability*. One count condition per rule; combined
   conditions stay in the JSON editor ("Edit in the form" is disabled there, with the reason).
-  Renaming a state renames it in the rules, default and edge state. *Clear the form* (with a
+  A new rule row counts at once; a missing *becomes* is explained by the form, and values that
+  *always* ignores are pointed out (warning). Renaming a state renames it in the rules, default
+  and edge state. *Clear the form* (with a
   confirmation) resets only the form; known automata and the JSON draft keep their own state.
   Elementary automata ask for a rule number instead of a rules table. The form logic
   (`ui/builder.py`) is pure Python and unit-tested; any definition the form can show survives

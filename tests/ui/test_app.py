@@ -333,13 +333,22 @@ def test_save_and_open_a_run(app, tmp_path, monkeypatch):
     app.number_input(key="r_generations").set_value(12).run()
     run_button(app).click().run()
     button(app, "Save run").click().run()
-    assert "Saved as" in app.success[0].value
+    saved = app.success[0].value
+    assert re.fullmatch(
+        r"Saved: Game of Life, 12 generations, \d{1,2} \w{3} \d{4}, \d\d:\d\d\. "
+        r"Find it under Saved runs\.",
+        saved,
+    ), saved
     assert len(list(tmp_path.iterdir())) == 1
     run_button(app).click().run()  # a new run replaces the shown one
     button(app, "Open run").click().run()
     assert not app.exception
     assert app.session_state["run"].last_generation == 12
-    assert "Opened" in app.success[0].value
+    opened = app.success[0].value
+    assert re.fullmatch(
+        r"Opened: Game of Life, 12 generations, \d{1,2} \w{3} \d{4}, \d\d:\d\d\.", opened
+    )
+    assert "_game-of-life" not in opened  # no folder names in messages
 
 
 def test_one_dimensional_automata_start_from_a_centre_cell(app):
@@ -467,3 +476,18 @@ def test_skip_while_playing_goes_to_the_end(app):
     assert headline(app) == "**Game of Life**: generation 50 of 50."
     assert app.select_slider(key="run_view").value == 50
     assert by_key(app, "skip_end").disabled
+
+
+def test_too_many_generations_are_explained_and_block_running(app):
+    """Regression: a value over the limit used to stay in the field while 50 was used."""
+    app.number_input(key="r_generations").set_value(20000).run()
+    assert "at most 10,000 generations" in app.error[0].value
+    assert run_button(app).disabled
+    app.number_input(key="r_generations").set_value(10000).run()
+    assert not app.error and not run_button(app).disabled
+
+
+def test_arrow_buttons_have_text_labels(app):
+    run_button(app).click().run()
+    assert by_key(app, "view_prev").label == "Previous"
+    assert by_key(app, "view_next").label == "Next"

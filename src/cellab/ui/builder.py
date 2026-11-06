@@ -172,10 +172,26 @@ def _rule_from_row(row: dict, number: int) -> tuple[dict, list[Issue]]:
     path = f"form.rules[{number - 1}]"
     label = f"Rule {number}"
     rule: dict = {"from": _text(row.get("from")) or ANY_STATE}
-    if not _blank(row.get("to")):
+    issues = []
+    if _blank(row.get("to")):
+        issues.append(Issue("error", f"{path}.to", f"{label}: choose what the cell becomes."))
+    else:
         rule["to"] = _text(row.get("to"))
     comparison = _text(row.get("comparison")) or "always"
-    issues = []
+    ignored = [
+        name
+        for key, name in (("value", "Number(s)"), ("count", "Neighbours in state"))
+        if not _blank(row.get(key))
+    ]
+    if comparison == "always" and ignored:
+        issues.append(
+            Issue(
+                "warning",
+                f"{path}.comparison",
+                f"{label}: {' and '.join(ignored)} {'is' if len(ignored) == 1 else 'are'} ignored "
+                "while 'When it has' is always. Choose a comparison to use them.",
+            )
+        )
     if comparison not in COMPARISONS:
         issues.append(Issue("error", f"{path}.comparison", f"{label}: unknown comparison."))
     elif COMPARISONS[comparison] is not None:

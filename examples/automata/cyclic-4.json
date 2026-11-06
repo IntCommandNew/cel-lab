@@ -1,0 +1,19 @@
+{
+  "name": "Cyclic automaton (4 states)",
+  "description": "Each state is followed by the next one in a cycle 0, 1, 2, 3, 0. A cell moves on to the next state when at least 2 of its neighbours already have it. From a random start, rotating spirals emerge.",
+  "grid": { "width": 60, "height": 45, "boundary": "wrap" },
+  "states": [
+    { "name": "zero", "symbol": "0", "color": "#2E2A5C" },
+    { "name": "one", "symbol": "1", "color": "#D9467A" },
+    { "name": "two", "symbol": "2", "color": "#E8A33A" },
+    { "name": "three", "symbol": "3", "color": "#4F9D69" }
+  ],
+  "default_state": "zero",
+  "neighborhood": { "type": "moore", "radius": 1 },
+  "rules": [
+    { "from": "zero", "to": "one", "when": { "count": "one", "ge": 2 } },
+    { "from": "one", "to": "two", "when": { "count": "two", "ge": 2 } },
+    { "from": "two", "to": "three", "when": { "count": "three", "ge": 2 } },
+    { "from": "three", "to": "zero", "when": { "count": "zero", "ge": 2 } }
+  ]
+}

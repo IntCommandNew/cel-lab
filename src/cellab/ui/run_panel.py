@@ -31,6 +31,7 @@ from cellab.ui.run_logic import (
     next_view,
     png_data_uri,
     render,
+    run_label,
     space_time,
 )
 
@@ -146,10 +147,11 @@ def run_section(automaton: Automaton, world: np.ndarray | None, setting: dict) -
     ss = st.session_state
     ss.current_context = (automaton, setting)
     with st.container(horizontal=True, vertical_alignment="bottom"):
+        # no max_value: a browser field over its maximum keeps showing the typed number while
+        # Streamlit silently keeps the old one; the limit is explained below instead
         generations = st.number_input(
             "Generations",
             min_value=1,
-            max_value=MAX_GUI_GENERATIONS,
             step=10,
             **keep("r_generations", 50),
         )
@@ -177,12 +179,18 @@ def run_section(automaton: Automaton, world: np.ndarray | None, setting: dict) -
             )
         )
     settings = RunSettings(history, int(every), seed)
+    too_many = int(generations) > MAX_GUI_GENERATIONS
+    if too_many:
+        st.error(
+            f"The GUI computes at most {MAX_GUI_GENERATIONS:,} generations at a time. Use a "
+            "smaller number; Continue extends a run as often as you like."
+        )
     run = ss.get("run")
     with st.container(horizontal=True):
         if st.button(
             f"Run {generations_label(int(generations))}",
             type="primary",
-            disabled=world is None,
+            disabled=world is None or too_many,
         ):
             try:
                 with st.spinner("Running..."):
@@ -196,7 +204,9 @@ def run_section(automaton: Automaton, world: np.ndarray | None, setting: dict) -
                 st.error(str(exc))
         run = ss.get("run")  # may have been replaced by the Run button just above
         can_continue = showing_run(automaton, setting) and run.automaton == automaton
-        if can_continue and st.button(f"Continue for {generations_label(int(generations))}"):
+        if can_continue and st.button(
+            f"Continue for {generations_label(int(generations))}", disabled=too_many
+        ):
             try:
                 with st.spinner("Running..."):
                     run.advance(int(generations))
@@ -206,8 +216,10 @@ def run_section(automaton: Automaton, world: np.ndarray | None, setting: dict) -
                 st.error(str(exc))
         if showing_run(automaton, setting) and st.button("Save run"):
             try:
-                folder = save_run(ss.run, ss.run.meta.get("folder"), root=runs_root())
-                ss.run_notice = f"Saved as {os.path.basename(folder)} in {runs_root()}."
+                save_run(ss.run, ss.run.meta.get("folder"), root=runs_root())
+                run = ss.run
+                label = run_label(run.automaton.name, run.last_generation, run.meta["created"])
+                ss.run_notice = f"Saved: {label}. Find it under Saved runs."
             except OSError as exc:
                 st.error(f"The run could not be saved: {exc}")
     if ss.get("run_notice"):
@@ -357,7 +369,7 @@ def _player() -> None:
     if len(options) > 1:
         with st.container(horizontal=True, vertical_alignment="center"):
             st.button(
-                "",
+                "Previous",
                 icon=":material/chevron_left:",
                 help="Previous generation",
                 key="view_prev",
@@ -381,8 +393,9 @@ def _player() -> None:
                     label_visibility="collapsed",
                 )
             st.button(
-                "",
+                "Next",
                 icon=":material/chevron_right:",
+                icon_position="right",
                 help="Next generation",
                 key="view_next",
                 on_click=_step,
@@ -469,7 +482,9 @@ def _open_run(folder: str) -> None:
         stop_playback()
         show_world_tab()
         ss.view_gen = None
-        ss.run_notice = f"Opened {os.path.basename(folder)}."
+        run = ss.run
+        label = run_label(run.automaton.name, run.last_generation, run.meta.get("created", ""))
+        ss.run_notice = f"Opened: {label}."
     except StorageError as exc:
         ss.run_notice = None
         ss.open_error = str(exc)
@@ -481,10 +496,7 @@ def saved_runs_tab() -> None:
     if not runs:
         st.markdown(f"No saved runs yet. Saved runs are stored in {runs_root()}.")
         return
-    labels = {
-        str(r.folder): f"{r.automaton}, {generations_label(r.last_generation)}, {r.created}"
-        for r in runs
-    }
+    labels = {str(r.folder): run_label(r.automaton, r.last_generation, r.created) for r in runs}
     choice = st.selectbox("Saved run", list(labels), format_func=labels.get, key="open_choice")
     st.button("Open run", on_click=_open_run, args=(choice,))
     if ss.get("open_error"):

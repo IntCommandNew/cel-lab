@@ -136,3 +136,19 @@ def test_fastest_playback_is_0_2_seconds():
     from cellab.ui.run_logic import DEFAULT_PLAY_DELAY, PLAY_DELAYS
 
     assert min(PLAY_DELAYS) == 0.2 and DEFAULT_PLAY_DELAY in PLAY_DELAYS
+
+
+def test_friendly_date():
+    from cellab.ui.run_logic import friendly_date
+
+    assert friendly_date("2026-11-06T01:32:29") == "6 Nov 2026, 01:32"
+    assert friendly_date("") == ""
+    assert friendly_date("yesterday") == "yesterday"
+
+
+def test_run_label_is_the_same_everywhere():
+    from cellab.ui.run_logic import run_label
+
+    assert (
+        run_label("Rule 30", 1, "2026-11-06T02:27:54") == "Rule 30, 1 generation, 6 Nov 2026, 02:27"
+    )
